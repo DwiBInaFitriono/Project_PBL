@@ -50,6 +50,7 @@ $serverlessEnv = [
     'SESSION_DRIVER' => 'cookie',
     'CACHE_STORE' => 'array',
     'LOG_CHANNEL' => 'stderr',
+    'APP_MAINTENANCE_DRIVER' => 'file',
 ];
 
 foreach ($serverlessEnv as $key => $val) {
