@@ -12,7 +12,15 @@ class AccessResponse
     public static function handle(Response $response, Throwable $exception, Request $request): Response
     {
         $status = $exception instanceof AuthenticationException ? 401 : $response->getStatusCode();
+        if ($status >= 500) {
+            error_log('[SERVER ERROR 500] '.$exception->getMessage().' in '.$exception->getFile().':'.$exception->getLine());
+        }
+
         if ($status >= 500 && ! config('app.debug')) {
+            if ($request->has('debug')) {
+                return response('<pre style="white-space: pre-wrap; font-family: monospace; padding: 20px; background: #111; color: #ff6b6b;">'.htmlspecialchars($exception->getMessage()."\n\nFile: ".$exception->getFile().':'.$exception->getLine()."\n\nTrace:\n".$exception->getTraceAsString()).'</pre>', 500);
+            }
+
             $message = 'Terjadi gangguan server. Silakan coba lagi nanti.';
             $response->setContent($request->expectsJson() || $request->is('api/*')
                 ? json_encode(['message' => $message], JSON_THROW_ON_ERROR)

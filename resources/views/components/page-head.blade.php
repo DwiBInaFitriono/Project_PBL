@@ -15,4 +15,6 @@
         document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0A1530' : '#F2F1EF';
     })();
 </script>
-@vite(['resources/css/app.css', 'resources/js/app.js'])
+@if (file_exists(public_path('build/manifest.json')) || app()->environment('local'))
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+@endif
