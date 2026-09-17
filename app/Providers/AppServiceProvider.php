@@ -7,6 +7,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,5 +31,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('web-monitoring', fn (Request $request) => Limit::perMinute(120)->by((string) $request->user()?->getAuthIdentifier()));
         RateLimiter::for('registration', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
         RateLimiter::for('history-export', fn (Request $request) => Limit::perMinute(5)->by((string) $request->user()?->getAuthIdentifier()));
+
+        if (request()->server('HTTP_X_FORWARDED_PROTO') === 'https' || str_contains((string) request()->header('host'), '.vercel.app') || app()->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }
