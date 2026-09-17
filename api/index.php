@@ -20,15 +20,20 @@ foreach ($directories as $dir) {
     }
 }
 
-// 2. Siapkan database SQLite lokal di /tmp jika diperlukan
+// 2. Siapkan database SQLite lokal di /tmp jika driver sqlite digunakan dan belum ada MySQL
 $sqliteSource = __DIR__.'/../database/database.sqlite';
 $sqliteDest = '/tmp/database.sqlite';
 
-if (! file_exists($sqliteDest)) {
-    if (file_exists($sqliteSource)) {
-        copy($sqliteSource, $sqliteDest);
-    } else {
-        touch($sqliteDest);
+if (getenv('DB_CONNECTION') === 'sqlite' || (! getenv('DB_CONNECTION') && ! getenv('DB_HOST'))) {
+    if (! file_exists($sqliteDest)) {
+        if (file_exists($sqliteSource)) {
+            copy($sqliteSource, $sqliteDest);
+        } else {
+            touch($sqliteDest);
+        }
+    }
+    if (! getenv('DB_DATABASE')) {
+        putenv("DB_DATABASE={$sqliteDest}");
     }
 }
 
@@ -38,10 +43,6 @@ putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
 putenv('SESSION_DRIVER=cookie');
 putenv('CACHE_STORE=array');
 putenv('LOG_CHANNEL=stderr');
-
-if (! getenv('DB_DATABASE') && file_exists($sqliteDest)) {
-    putenv("DB_DATABASE={$sqliteDest}");
-}
 
 // 4. Eksekusi router aplikasi Laravel
 require __DIR__.'/../public/index.php';
