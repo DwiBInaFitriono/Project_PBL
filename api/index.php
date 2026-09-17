@@ -28,6 +28,12 @@ if (getenv('DB_HOST')) {
     putenv('DB_CONNECTION=mysql');
     $_ENV['DB_CONNECTION'] = 'mysql';
     $_SERVER['DB_CONNECTION'] = 'mysql';
+
+    if (getenv('DB_DATABASE') === 'sys' || ! getenv('DB_DATABASE')) {
+        putenv('DB_DATABASE=test');
+        $_ENV['DB_DATABASE'] = 'test';
+        $_SERVER['DB_DATABASE'] = 'test';
+    }
 } elseif (getenv('DB_CONNECTION') === 'sqlite' || ! getenv('DB_CONNECTION')) {
     if (! file_exists($sqliteDest)) {
         if (file_exists($sqliteSource)) {
