@@ -44,11 +44,26 @@ if (getenv('DB_HOST')) {
 }
 
 // 3. Set environment variable runtime serverless Vercel
-putenv('APP_STORAGE=/tmp/storage');
-putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
-putenv('SESSION_DRIVER=cookie');
-putenv('CACHE_STORE=array');
-putenv('LOG_CHANNEL=stderr');
+$serverlessEnv = [
+    'APP_STORAGE' => '/tmp/storage',
+    'VIEW_COMPILED_PATH' => '/tmp/storage/framework/views',
+    'SESSION_DRIVER' => 'cookie',
+    'CACHE_STORE' => 'array',
+    'LOG_CHANNEL' => 'stderr',
+];
+
+foreach ($serverlessEnv as $key => $val) {
+    putenv("{$key}={$val}");
+    $_ENV[$key] = $val;
+    $_SERVER[$key] = $val;
+}
+
+if (! getenv('APP_KEY') && empty($_ENV['APP_KEY']) && empty($_SERVER['APP_KEY'])) {
+    $fallbackKey = 'base64:HsRNMGIZaxiGotCaQXu3mHHuin5vRhDyG5XrOqWPrno=';
+    putenv("APP_KEY={$fallbackKey}");
+    $_ENV['APP_KEY'] = $fallbackKey;
+    $_SERVER['APP_KEY'] = $fallbackKey;
+}
 
 // 4. Eksekusi router aplikasi Laravel
 require __DIR__.'/../public/index.php';
