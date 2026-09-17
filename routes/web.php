@@ -7,6 +7,9 @@ use App\Http\Controllers\MonitoringDataController;
 use App\Http\Controllers\NodeController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\SettingsController;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function (): void {
@@ -28,3 +31,45 @@ Route::get('/settings/account', [SettingsController::class, 'account'])->middlew
 Route::patch('/settings/account', [SettingsController::class, 'updateAccount'])->middleware('auth')->name('settings.account.update');
 Route::patch('/settings/password', [PasswordController::class, '__invoke'])->middleware('auth')->name('settings.password.update');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+Route::get('/system/migrate', function (Request $request) {
+    if ($request->query('key') !== config('app.key') && $request->query('key') !== 'rebung-pbl-2026') {
+        abort(403, 'Akses tidak diizinkan.');
+    }
+
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        $output = Artisan::output();
+
+        if ($request->boolean('create_admin')) {
+            $adminEmail = $request->query('email', 'admin@rebungpintar.id');
+            $adminPass = $request->query('password', 'Admin1234#');
+            $user = User::firstOrNew(['email' => $adminEmail]);
+            $user->name = 'Administrator Rebung';
+            $user->password = $adminPass;
+            $user->role = 'operator';
+            $user->save();
+            $output .= "\nAkun Admin/Operator berhasil dibuat:\nEmail: {$adminEmail}\nPassword: {$adminPass}\nRole: operator";
+        }
+
+        if ($email = $request->query('make_operator')) {
+            $user = User::where('email', $email)->first();
+            if ($user) {
+                $user->role = 'operator';
+                $user->save();
+                $output .= "\nUser {$email} berhasil dijadikan Operator.";
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Migrasi database berhasil dijalankan.',
+            'output' => $output,
+        ]);
+    } catch (Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+});

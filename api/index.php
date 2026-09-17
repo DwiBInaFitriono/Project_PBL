@@ -72,5 +72,7 @@ if ((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PRO
     $_SERVER['SERVER_PORT'] = '443';
 }
 
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+
 // 4. Eksekusi router aplikasi Laravel
 require __DIR__.'/../public/index.php';
