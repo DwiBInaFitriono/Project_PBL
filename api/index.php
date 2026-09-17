@@ -24,7 +24,11 @@ foreach ($directories as $dir) {
 $sqliteSource = __DIR__.'/../database/database.sqlite';
 $sqliteDest = '/tmp/database.sqlite';
 
-if (getenv('DB_CONNECTION') === 'sqlite' || (! getenv('DB_CONNECTION') && ! getenv('DB_HOST'))) {
+if (getenv('DB_HOST')) {
+    putenv('DB_CONNECTION=mysql');
+    $_ENV['DB_CONNECTION'] = 'mysql';
+    $_SERVER['DB_CONNECTION'] = 'mysql';
+} elseif (getenv('DB_CONNECTION') === 'sqlite' || ! getenv('DB_CONNECTION')) {
     if (! file_exists($sqliteDest)) {
         if (file_exists($sqliteSource)) {
             copy($sqliteSource, $sqliteDest);
@@ -34,6 +38,8 @@ if (getenv('DB_CONNECTION') === 'sqlite' || (! getenv('DB_CONNECTION') && ! gete
     }
     if (! getenv('DB_DATABASE')) {
         putenv("DB_DATABASE={$sqliteDest}");
+        $_ENV['DB_DATABASE'] = $sqliteDest;
+        $_SERVER['DB_DATABASE'] = $sqliteDest;
     }
 }
 
