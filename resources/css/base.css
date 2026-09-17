@@ -1,0 +1,150 @@
+:root {
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-right: env(safe-area-inset-right, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-left: env(safe-area-inset-left, 0px);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+button, input {
+    font: inherit;
+}
+
+button, a, input {
+    -webkit-tap-highlight-color: transparent;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: .7;
+}
+
+:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 4px;
+}
+
+::selection {
+    background: var(--palette-yellow);
+    color: var(--palette-navy);
+}
+
+.brand {
+    display: inline-flex;
+    gap: 11px;
+    align-items: center;
+    line-height: 1.02;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.8px;
+}
+
+.brand-mark {
+    width: 34px;
+    height: 40px;
+}
+
+.brand-second {
+    display: block;
+}
+
+.brand-dot {
+    color: var(--palette-blue);
+}
+
+.theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--subtle-border);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+.theme-toggle [data-theme-icon="sun"] {
+    display: none;
+}
+
+[data-theme="dark"] .theme-toggle [data-theme-icon="moon"] {
+    display: none;
+}
+
+[data-theme="dark"] .theme-toggle [data-theme-icon="sun"] {
+    display: block;
+}
+
+.theme-toggle:hover {
+    border-color: var(--palette-blue);
+    background: color-mix(in srgb, var(--palette-blue) 9%, transparent);
+}
+
+.eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+}
+
+.eyebrow > span {
+    display: block;
+    width: 7px;
+    height: 7px;
+    background: var(--palette-blue);
+    border-radius: 50%;
+}
+
+h1 {
+    font-size: clamp(29px, 2.7vw, 38px);
+    font-weight: 700;
+    line-height: 1.16;
+    letter-spacing: -1.6px;
+    text-wrap: balance;
+    margin: 0 0 13px;
+}
+
+.form-intro {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}

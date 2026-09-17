@@ -1,0 +1,15 @@
+@import 'tailwindcss' source(none);
+@import './tokens.css';
+@import './base.css';
+@import './auth.css';
+@import './dashboard.css';
+@import './sidebar.css';
+@import './settings.css';
+@import './scrollbars.css';
+@import './monitoring-live.css';
+@import './custom-select.css';
+@import './access.css';
+
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';

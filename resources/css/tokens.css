@@ -1,0 +1,35 @@
+@theme {
+    --font-sans: 'Trebuchet MS', 'Segoe UI', sans-serif;
+}
+
+:root {
+    --palette-ivory: #F2F1EF;
+    --palette-yellow: #F7B700;
+    --palette-navy: #011E60;
+    --palette-blue: #6A7FC0;
+    --surface: var(--palette-ivory);
+    --ink: var(--palette-navy);
+    --muted: #52607B;
+    --field: #FAF9F7;
+    --border: #B7BDCB;
+    --subtle-border: #DADCE2;
+    --button-bg: var(--palette-navy);
+    --button-ink: var(--palette-ivory);
+    --focus: var(--palette-navy);
+    --error: #A12620;
+    color-scheme: light;
+}
+
+[data-theme="dark"] {
+    --surface: #0A1530;
+    --ink: var(--palette-ivory);
+    --muted: #B3BEDB;
+    --field: #111F40;
+    --border: #697BA5;
+    --subtle-border: #31405F;
+    --button-bg: var(--palette-yellow);
+    --button-ink: var(--palette-navy);
+    --focus: var(--palette-yellow);
+    --error: #FFADA6;
+    color-scheme: dark;
+}

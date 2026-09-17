@@ -1,0 +1,131 @@
+# ==============================================================================
+# Rebung Pintar — Arsitektur Komputasi Awan 3 Node (Docker Compose)
+# PBL Track: Komputasi Awan
+# Node 1: Backend Server (Laravel 13 + PHP 8.3 FPM + Nginx + MQTT Subscriber)
+# Node 2: Database Server (Dedicated MariaDB Database)
+# Node 3: MQTT & Backup Server (Eclipse Mosquitto + Automated Backup Daemon)
+# ==============================================================================
+
+version: '3.8'
+
+networks:
+  rebung-network:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
+  backup_data:
+    driver: local
+  mosquitto_data:
+    driver: local
+
+services:
+  # ----------------------------------------------------------------------------
+  # NODE 1: BACKEND SERVER
+  # Menangani HTTP REST API (/api/v1), Dashboard Web, dan MQTT Ingestion Worker
+  # ----------------------------------------------------------------------------
+  backend-node:
+    image: php:8.3-fpm-alpine
+    container_name: rebung-node-1-backend
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=mysql
+      - DB_HOST=database-node
+      - DB_PORT=3306
+      - DB_DATABASE=rebung_pintar
+      - DB_USERNAME=rebung_user
+      - DB_PASSWORD=rebung_secret_password
+      - MQTT_ENABLED=true
+      - MQTT_HOST=mqtt-backup-node
+      - MQTT_PORT=1883
+    ports:
+      - "8000:80"
+    depends_on:
+      - database-node
+      - mqtt-backup-node
+    networks:
+      - rebung-network
+
+  # ----------------------------------------------------------------------------
+  # NODE 2: DATABASE SERVER
+  # Server database mandiri terisolasi untuk menyimpan users & sensor_readings
+  # ----------------------------------------------------------------------------
+  database-node:
+    image: mariadb:11.2-jammy
+    container_name: rebung-node-2-database
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_secure_password
+      - MYSQL_DATABASE=rebung_pintar
+      - MYSQL_USER=rebung_user
+      - MYSQL_PASSWORD=rebung_secret_password
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - rebung-network
+
+  # ----------------------------------------------------------------------------
+  # NODE 3: MQTT BROKER & BACKUP SERVER
+  # Broker Mosquitto (port 1883 TCP & 9001 WS) + Scheduled Backup Daemon
+  # ----------------------------------------------------------------------------
+  mqtt-backup-node:
+    image: eclipse-mosquitto:2.0
+    container_name: rebung-node-3-mqtt
+    restart: unless-stopped
+    volumes:
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+    ports:
+      - "1883:1883" # MQTT TCP (ESP32 & Backend)
+      - "9001:9001" # MQTT WebSocket (Mobile & Web)
+    networks:
+      - rebung-network
+
+  backup-daemon:
+    image: alpine:3.19
+    container_name: rebung-node-3-backup
+    restart: unless-stopped
+    volumes:
+      - ./docker/backup/backup.sh:/backup.sh:ro
+      - backup_data:/backups
+    environment:
+      - DB_HOST=database-node
+      - DB_DATABASE=rebung_pintar
+      - DB_USER=rebung_user
+      - DB_PASSWORD=rebung_secret_password
+    entrypoint: |
+      /bin/sh -c "
+        apk add --no-cache mariadb-client gzip tzdata &&
+        cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime &&
+        chmod +x /backup.sh &&
+        echo '0 2 * * * /backup.sh' > /etc/crontabs/root &&
+        /backup.sh &&
+        crond -f -l 2
+      "
+    depends_on:
+      - database-node
+    networks:
+      - rebung-network
+
+  # ----------------------------------------------------------------------------
+  # CLOUDFLARE TUNNEL (OPSIONAL / BONUS DEPLOYMENT DOMAIN)
+  # Menghubungkan Backend Node ke domain publik HTTPS tanpa buka port router
+  # ----------------------------------------------------------------------------
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: rebung-cloudflare-tunnel
+    restart: unless-stopped
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
+    command: tunnel --no-autoupdate run
+    networks:
+      - rebung-network

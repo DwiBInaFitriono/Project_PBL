@@ -1,0 +1,43 @@
+.access-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    margin: 0 0 18px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--palette-blue) 12%, var(--field));
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.access-warning svg {
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.access-warning p {
+    margin: 0;
+}
+
+.monitoring-access-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+[data-access-recovery][hidden] {
+    display: none;
+}
+
+[data-page="dashboard"] button[data-poll-refresh]:disabled {
+    cursor: not-allowed;
+}
+
+[data-page="login"]:has(.access-warning) .form-note {
+    display: none;
+}
