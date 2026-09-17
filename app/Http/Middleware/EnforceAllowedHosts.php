@@ -23,11 +23,19 @@ class EnforceAllowedHosts extends TrustProxies
                     }
                 }
                 $direct = new Request(server: ['HTTP_HOST' => $request->headers->get('host', '')]);
-                if (! in_array($direct->getHost(), $allowed, true) || ! in_array($request->getHost(), $allowed, true)) {
+                $directHost = strtolower($direct->getHost());
+                $reqHost = strtolower($request->getHost());
+
+                if (str_ends_with($directHost, '.vercel.app') && str_ends_with($reqHost, '.vercel.app')) {
+                    return $next($request);
+                }
+
+                if (! in_array($directHost, $allowed, true) || ! in_array($reqHost, $allowed, true)) {
                     return response('Host tidak diizinkan.', 400);
                 }
 
                 return $next($request);
+
             });
         } catch (SuspiciousOperationException) {
             return response('Host tidak diizinkan.', 400);

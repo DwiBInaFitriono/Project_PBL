@@ -1,0 +1,10 @@
+/vendor
+/node_modules
+/android-app
+/hardware
+/test-results
+/playwright-report
+/tests
+.git
+.github
+*.log
