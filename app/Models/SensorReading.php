@@ -24,8 +24,13 @@ class SensorReading extends Model
      */
     public function scopeValid(Builder $query): Builder
     {
-        return $query->whereRaw("typeof(value) IN ('integer', 'real')")
-            ->whereBetween('value', [-PHP_FLOAT_MAX, PHP_FLOAT_MAX])
+        $isSqlite = $query->getConnection()->getDriverName() === 'sqlite';
+
+        if ($isSqlite) {
+            $query->whereRaw("typeof(value) IN ('integer', 'real')");
+        }
+
+        return $query->whereBetween('value', [-PHP_FLOAT_MAX, PHP_FLOAT_MAX])
             ->whereIn('node_id', array_column(config('monitoring.nodes'), 'id'))
             ->whereIn('sensor_id', array_column(config('monitoring.sensors'), 'id'));
     }

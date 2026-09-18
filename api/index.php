@@ -25,9 +25,11 @@ $sqliteSource = __DIR__.'/../database/database.sqlite';
 $sqliteDest = '/tmp/database.sqlite';
 
 if (getenv('DB_HOST')) {
-    putenv('DB_CONNECTION=mysql');
-    $_ENV['DB_CONNECTION'] = 'mysql';
-    $_SERVER['DB_CONNECTION'] = 'mysql';
+    if (! getenv('DB_CONNECTION')) {
+        putenv('DB_CONNECTION=mysql');
+        $_ENV['DB_CONNECTION'] = 'mysql';
+        $_SERVER['DB_CONNECTION'] = 'mysql';
+    }
 
     if (getenv('DB_DATABASE') === 'sys' || ! getenv('DB_DATABASE')) {
         putenv('DB_DATABASE=test');
