@@ -65,7 +65,7 @@ if (getenv('DB_HOST')) {
 $serverlessEnv = [
     'APP_STORAGE' => '/tmp/storage',
     'VIEW_COMPILED_PATH' => '/tmp/storage/framework/views',
-    'SESSION_DRIVER' => 'cookie',
+    'SESSION_DRIVER' => 'database',
     'CACHE_STORE' => 'array',
     'LOG_CHANNEL' => 'stderr',
     'APP_MAINTENANCE_DRIVER' => 'file',
