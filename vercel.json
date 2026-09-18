@@ -40,6 +40,7 @@
     "DB_PORT": "4000",
     "DB_DATABASE": "rebung_pintar",
     "DB_USERNAME": "BTQp5f5xYCheqHW.root",
-    "DB_PASSWORD": "v9NolNUnT7j1X20f"
+    "DB_PASSWORD": "v9NolNUnT7j1X20f",
+    "HASH_DRIVER": "argon2id"
   }
 }
