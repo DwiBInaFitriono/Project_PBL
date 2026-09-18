@@ -35,13 +35,7 @@
     "VIEW_COMPILED_PATH": "/tmp/storage/framework/views",
     "CACHE_STORE": "array",
     "SESSION_DRIVER": "database",
-    "LOG_CHANNEL": "stderr",
-    "DB_CONNECTION": "mysql",
-    "DB_HOST": "gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
-    "DB_PORT": "4000",
-    "DB_DATABASE": "rebung_pintar",
-    "DB_USERNAME": "BTQp5f5xYCheqHW.root",
-    "DB_PASSWORD": "v9NolNUnT7j1X20f",
-    "HASH_DRIVER": "argon2id"
+    "LOG_CHANNEL": "stderr"
   }
 }
+
