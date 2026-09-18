@@ -5,6 +5,24 @@
 // Mengarahkan request serverless Vercel ke public/index.php dengan /tmp storage
 // ==============================================================================
 
+// 0. Deteksi dukungan bcrypt di runtime ini.
+//    Vercel PHP (Amazon Linux 2) kadang tidak menyertakan libcrypt dengan dukungan
+//    Blowfish, sehingga password_hash() dengan PASSWORD_BCRYPT mengembalikan false.
+//    Jika itu terjadi, gunakan argon2id agar aplikasi tetap berjalan.
+//    Login dengan akun bcrypt lama akan tetap berhasil karena Hash::check()
+//    sudah mendeteksi algoritma hash dari prefix string ($2y$ vs $argon2id$).
+$_REBUNG_BCRYPT_OK = defined('PASSWORD_BCRYPT')
+    && @password_hash('t', PASSWORD_BCRYPT, ['cost' => 4]) !== false;
+
+if (! $_REBUNG_BCRYPT_OK) {
+    // bcrypt tidak tersedia di runtime ini — gunakan argon2id sebagai driver
+    putenv('HASH_DRIVER=argon2id');
+    $_ENV['HASH_DRIVER'] = 'argon2id';
+    $_SERVER['HASH_DRIVER'] = 'argon2id';
+    error_log('[REBUNG] bcrypt tidak tersedia di runtime ini, fallback ke argon2id');
+}
+unset($_REBUNG_BCRYPT_OK);
+
 // 1. Siapkan struktur direktori writable di /tmp untuk views, cache, dan logs
 $directories = [
     '/tmp/storage/app',
