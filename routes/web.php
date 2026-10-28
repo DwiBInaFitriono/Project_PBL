@@ -44,12 +44,13 @@ Route::get('/system/migrate', function (Request $request) {
         if ($request->boolean('create_admin')) {
             $adminEmail = $request->query('email', 'admin@hidroponikdft.id');
             $adminPass = $request->query('password', 'Admin1234#');
+            $adminName = $request->query('name', 'Administrator Hidroponik');
             $user = User::firstOrNew(['email' => $adminEmail]);
-            $user->name = 'Administrator Hidroponik';
+            $user->name = $adminName;
             $user->password = $adminPass;
             $user->role = 'operator';
             $user->save();
-            $output .= "\nAkun Admin/Operator berhasil dibuat:\nEmail: {$adminEmail}\nPassword: {$adminPass}\nRole: operator";
+            $output .= "\nAkun Admin/Operator berhasil dibuat:\nEmail: {$adminEmail}\nNama: {$adminName}\nPassword: {$adminPass}\nRole: operator";
         }
 
         if ($email = $request->query('make_operator')) {
