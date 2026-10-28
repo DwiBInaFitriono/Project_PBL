@@ -42,9 +42,9 @@ if (getenv('DB_HOST')) {
     }
 
     if (getenv('DB_DATABASE') === 'sys' || ! getenv('DB_DATABASE')) {
-        putenv('DB_DATABASE=test');
-        $_ENV['DB_DATABASE'] = 'test';
-        $_SERVER['DB_DATABASE'] = 'test';
+        putenv('DB_DATABASE=hidroponik_dft');
+        $_ENV['DB_DATABASE'] = 'hidroponik_dft';
+        $_SERVER['DB_DATABASE'] = 'hidroponik_dft';
     }
 } elseif (getenv('DB_CONNECTION') === 'sqlite' || ! getenv('DB_CONNECTION')) {
     if (! file_exists($sqliteDest)) {
