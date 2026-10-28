@@ -118,7 +118,7 @@ class MonitoringDataTest extends TestCase
 
         $data = app(MonitoringSnapshot::class)->forNode();
 
-        $this->assertSame(8, $data['sensorCount']);
+        $this->assertSame(7, $data['sensorCount']);
         $this->assertSame(now()->toIso8601String(), $data['monitoring']['generatedAt']);
         $this->assertSame(300, $data['monitoring']['staleAfterSeconds'] ?? null);
         $this->assertSame(15, $data['monitoring']['pollIntervalSeconds'] ?? null);

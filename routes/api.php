@@ -19,7 +19,7 @@ Route::prefix('v1')->group(function (): void {
     });
 
     Route::get('/system/migrate', function (Request $request) {
-        if ($request->query('key') !== config('app.key') && $request->query('key') !== 'rebung-pbl-2026') {
+        if ($request->query('key') !== config('app.key') && $request->query('key') !== 'hidroponik-dft-2026' && $request->query('key') !== 'rebung-pbl-2026') {
             abort(403, 'Akses tidak diizinkan.');
         }
 

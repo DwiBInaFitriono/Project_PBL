@@ -12,7 +12,7 @@ return [
     'tls_verify_peer' => true,
     'tls_verify_peer_name' => true,
     'tls_allow_self_signed' => false,
-    'tls_ca_file' => env('MQTT_TLS_CA_FILE'),
+    'tls_ca_file' => env('MQTT_TLS_CA_FILE') ?: null,
     'connect_timeout' => 10,
     'socket_timeout' => 5,
     'subscription_ack_timeout' => 10,

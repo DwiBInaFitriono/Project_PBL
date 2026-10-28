@@ -7,8 +7,8 @@ void main() {
   test(
     'klien Flutter berbicara ke REST Laravel nyata terisolasi',
     () async {
-      final url = Platform.environment['REBUNG_TEST_API_URL'];
-      final password = Platform.environment['REBUNG_TEST_PASSWORD'];
+      final url = Platform.environment['HIDROPONIK_TEST_API_URL'] ?? Platform.environment['REBUNG_TEST_API_URL'];
+      final password = Platform.environment['HIDROPONIK_TEST_PASSWORD'] ?? Platform.environment['REBUNG_TEST_PASSWORD'];
       if (url == null || password == null) {
         return;
       }
@@ -37,7 +37,7 @@ void main() {
         api.dispose();
       }
     },
-    skip: Platform.environment['REBUNG_TEST_API_URL'] == null
+    skip: (Platform.environment['HIDROPONIK_TEST_API_URL'] ?? Platform.environment['REBUNG_TEST_API_URL']) == null
         ? 'Gunakan fixture REST terisolasi untuk uji lintas runtime.'
         : false,
   );

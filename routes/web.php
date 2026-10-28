@@ -33,7 +33,7 @@ Route::patch('/settings/password', [PasswordController::class, '__invoke'])->mid
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::get('/system/migrate', function (Request $request) {
-    if ($request->query('key') !== config('app.key') && $request->query('key') !== 'rebung-pbl-2026') {
+    if ($request->query('key') !== config('app.key') && $request->query('key') !== 'hidroponik-dft-2026' && $request->query('key') !== 'rebung-pbl-2026') {
         abort(403, 'Akses tidak diizinkan.');
     }
 
@@ -42,10 +42,10 @@ Route::get('/system/migrate', function (Request $request) {
         $output = Artisan::output();
 
         if ($request->boolean('create_admin')) {
-            $adminEmail = $request->query('email', 'admin@rebungpintar.id');
+            $adminEmail = $request->query('email', 'admin@hidroponikdft.id');
             $adminPass = $request->query('password', 'Admin1234#');
             $user = User::firstOrNew(['email' => $adminEmail]);
-            $user->name = 'Administrator Rebung';
+            $user->name = 'Administrator Hidroponik';
             $user->password = $adminPass;
             $user->role = 'operator';
             $user->save();

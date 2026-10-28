@@ -282,12 +282,12 @@ class SettingsTest extends TestCase
 
     public function test_account_settings_show_the_authenticated_profile_without_secrets(): void
     {
-        $user = User::factory()->make(['name' => 'Operator Rebung', 'email' => 'operator@example.test']);
+        $user = User::factory()->make(['name' => 'Operator Hidroponik', 'email' => 'operator@example.test']);
 
         $this->actingAs($user)->get('/settings/account')
             ->assertOk()->assertViewIs('settings.account')
             ->assertSeeText('Setting Akun')
-            ->assertSee('value="Operator Rebung"', false)
+            ->assertSee('value="Operator Hidroponik"', false)
             ->assertSee('value="operator@example.test"', false)
             ->assertSee('name="_token"', false)
             ->assertSee('name="_method" value="PATCH"', false)

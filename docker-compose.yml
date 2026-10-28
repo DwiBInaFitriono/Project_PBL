@@ -1,5 +1,5 @@
 # ==============================================================================
-# Rebung Pintar — Arsitektur Komputasi Awan 3 Node (Docker Compose)
+# Hidroponik DFT — Arsitektur Komputasi Awan 3 Node (Docker Compose)
 # PBL Track: Komputasi Awan
 # Node 1: Backend Server (Laravel 13 + PHP 8.3 FPM + Nginx + MQTT Subscriber)
 # Node 2: Database Server (Dedicated MariaDB Database)
@@ -9,7 +9,7 @@
 version: '3.8'
 
 networks:
-  rebung-network:
+  hidroponik-network:
     driver: bridge
 
 volumes:
@@ -27,7 +27,7 @@ services:
   # ----------------------------------------------------------------------------
   backend-node:
     image: php:8.3-fpm-alpine
-    container_name: rebung-node-1-backend
+    container_name: hidroponik-node-1-backend
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
@@ -39,9 +39,9 @@ services:
       - DB_CONNECTION=mysql
       - DB_HOST=database-node
       - DB_PORT=3306
-      - DB_DATABASE=rebung_pintar
-      - DB_USERNAME=rebung_user
-      - DB_PASSWORD=rebung_secret_password
+      - DB_DATABASE=hidroponik_dft
+      - DB_USERNAME=hidroponik_user
+      - DB_PASSWORD=hidroponik_secret_password
       - MQTT_ENABLED=true
       - MQTT_HOST=mqtt-backup-node
       - MQTT_PORT=1883
@@ -51,7 +51,7 @@ services:
       - database-node
       - mqtt-backup-node
     networks:
-      - rebung-network
+      - hidroponik-network
 
   # ----------------------------------------------------------------------------
   # NODE 2: DATABASE SERVER
@@ -59,19 +59,19 @@ services:
   # ----------------------------------------------------------------------------
   database-node:
     image: mariadb:11.2-jammy
-    container_name: rebung-node-2-database
+    container_name: hidroponik-node-2-database
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=root_secure_password
-      - MYSQL_DATABASE=rebung_pintar
-      - MYSQL_USER=rebung_user
-      - MYSQL_PASSWORD=rebung_secret_password
+      - MYSQL_DATABASE=hidroponik_dft
+      - MYSQL_USER=hidroponik_user
+      - MYSQL_PASSWORD=hidroponik_secret_password
     volumes:
       - db_data:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
-      - rebung-network
+      - hidroponik-network
 
   # ----------------------------------------------------------------------------
   # NODE 3: MQTT BROKER & BACKUP SERVER
@@ -79,7 +79,7 @@ services:
   # ----------------------------------------------------------------------------
   mqtt-backup-node:
     image: eclipse-mosquitto:2.0
-    container_name: rebung-node-3-mqtt
+    container_name: hidroponik-node-3-mqtt
     restart: unless-stopped
     volumes:
       - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
@@ -88,20 +88,20 @@ services:
       - "1883:1883" # MQTT TCP (ESP32 & Backend)
       - "9001:9001" # MQTT WebSocket (Mobile & Web)
     networks:
-      - rebung-network
+      - hidroponik-network
 
   backup-daemon:
     image: alpine:3.19
-    container_name: rebung-node-3-backup
+    container_name: hidroponik-node-3-backup
     restart: unless-stopped
     volumes:
       - ./docker/backup/backup.sh:/backup.sh:ro
       - backup_data:/backups
     environment:
       - DB_HOST=database-node
-      - DB_DATABASE=rebung_pintar
-      - DB_USER=rebung_user
-      - DB_PASSWORD=rebung_secret_password
+      - DB_DATABASE=hidroponik_dft
+      - DB_USER=hidroponik_user
+      - DB_PASSWORD=hidroponik_secret_password
     entrypoint: |
       /bin/sh -c "
         apk add --no-cache mariadb-client gzip tzdata &&
@@ -114,7 +114,7 @@ services:
     depends_on:
       - database-node
     networks:
-      - rebung-network
+      - hidroponik-network
 
   # ----------------------------------------------------------------------------
   # CLOUDFLARE TUNNEL (OPSIONAL / BONUS DEPLOYMENT DOMAIN)
@@ -122,10 +122,10 @@ services:
   # ----------------------------------------------------------------------------
   cloudflare-tunnel:
     image: cloudflare/cloudflared:latest
-    container_name: rebung-cloudflare-tunnel
+    container_name: hidroponik-cloudflare-tunnel
     restart: unless-stopped
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
     command: tunnel --no-autoupdate run
     networks:
-      - rebung-network
+      - hidroponik-network

@@ -39,7 +39,7 @@ class MqttConfiguration
             $problems[] = 'Verifikasi sertifikat TLS MQTT wajib diaktifkan tanpa self-signed.';
         }
         $ca = config('mqtt.tls_ca_file');
-        if ($ca !== null && (! is_string($ca) || ! is_file($ca) || ! is_readable($ca))) {
+        if ($ca !== null && $ca !== '' && (! is_string($ca) || ! is_file($ca) || ! is_readable($ca))) {
             $problems[] = 'MQTT_TLS_CA_FILE tidak dapat dibaca.';
         }
 

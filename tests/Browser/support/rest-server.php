@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Artisan;
 
 require __DIR__.'/../../../vendor/autoload.php';
 
-$directory = getenv('REBUNG_TEST_DIRECTORY');
-$password = getenv('REBUNG_TEST_PASSWORD');
+$directory = getenv('HIDROPONIK_TEST_DIRECTORY') ?: getenv('REBUNG_TEST_DIRECTORY');
+$password = getenv('HIDROPONIK_TEST_PASSWORD') ?: getenv('REBUNG_TEST_PASSWORD');
 $directory = is_string($directory) ? realpath($directory) : false;
-if ($directory === false || ! str_starts_with(basename($directory), 'rebung-api-e2e-')
+if ($directory === false || (! str_starts_with(basename($directory), 'hidroponik-api-e2e-') && ! str_starts_with(basename($directory), 'rebung-api-e2e-'))
     || realpath(dirname($directory)) !== realpath(sys_get_temp_dir()) || ! is_string($password) || strlen($password) < 24) {
     throw new RuntimeException('Isolated test environment required.');
 }

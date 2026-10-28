@@ -1,6 +1,6 @@
 #!/bin/sh
 # ==============================================================================
-# Rebung Pintar — Daemon Backup Otomatis Database (Node 3)
+# Hidroponik DFT — Daemon Backup Otomatis Database (Node 3)
 # Mengambil cadangan database dari Node 2 secara berkala dan menyimpan arsip terkompresi
 # ==============================================================================
 
@@ -8,7 +8,7 @@ set -e
 
 BACKUP_DIR="/backups"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-BACKUP_FILE="${BACKUP_DIR}/rebung_backup_${TIMESTAMP}.sql.gz"
+BACKUP_FILE="${BACKUP_DIR}/hidroponik_backup_${TIMESTAMP}.sql.gz"
 
 mkdir -p "${BACKUP_DIR}"
 
@@ -31,5 +31,5 @@ sha256sum "${BACKUP_FILE}" > "${BACKUP_FILE}.sha256"
 echo "[$(date -Iseconds)] Backup selesai: ${BACKUP_FILE}"
 
 # Hapus backup yang lebih lama dari 7 hari (kebijakan retensi otomatis)
-find "${BACKUP_DIR}" -name "rebung_backup_*.sql.gz*" -type f -mtime +7 -exec rm -f {} +
+find "${BACKUP_DIR}" -name "*backup_*.sql.gz*" -type f -mtime +7 -exec rm -f {} +
 echo "[$(date -Iseconds)] Retensi backup 7 hari dibersihkan."

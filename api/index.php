@@ -1,7 +1,7 @@
 <?php
 
 // ==============================================================================
-// Rebung Pintar — Vercel Serverless Entrypoint
+// Hidroponik DFT — Vercel Serverless Entrypoint
 // Mengarahkan request serverless Vercel ke public/index.php dengan /tmp storage
 // ==============================================================================
 

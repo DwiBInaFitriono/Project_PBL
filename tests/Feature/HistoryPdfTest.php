@@ -84,7 +84,7 @@ class HistoryPdfTest extends TestCase
         $response->assertOk()->assertHeader('Content-Type', 'text/html; charset=UTF-8')
             ->assertHeader('X-Content-Type-Options', 'nosniff')
             ->assertViewIs('history.export')->assertViewHas('filters', $filters)
-            ->assertSeeText('Rebung Pintar')->assertSeeText('Riwayat pembacaan')
+            ->assertSeeText('Hidroponik DFT')->assertSeeText('Riwayat pembacaan')
             ->assertSeeText('Node Iklim')->assertSeeText('pH nutrisi')->assertSeeText('2026-09-17')
             ->assertSeeText('Waktu (WIB)')->assertSeeText('2026-09-17 00:00:00')
             ->assertSeeText('-2.5')->assertSeeText('pH')->assertSeeText('Total: 1 pembacaan')

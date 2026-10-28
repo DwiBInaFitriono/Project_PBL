@@ -3,8 +3,8 @@
 import { chromium } from '@playwright/test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
-const email = process.env.REBUNG_SMOKE_EMAIL;
-const password = process.env.REBUNG_SMOKE_PASSWORD;
+const email = process.env.HIDROPONIK_SMOKE_EMAIL || process.env.REBUNG_SMOKE_EMAIL;
+const password = process.env.HIDROPONIK_SMOKE_PASSWORD || process.env.REBUNG_SMOKE_PASSWORD;
 if (!email || !password) throw new Error('Supply smoke-test credentials via environment.');
 const browser = await chromium.launch({executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe'});
 let authenticated = false;

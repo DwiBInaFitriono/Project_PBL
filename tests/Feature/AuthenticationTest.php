@@ -291,7 +291,7 @@ class AuthenticationTest extends TestCase
 
         $this->actingAs($user)->get('/dashboard')->assertOk()->assertViewIs('dashboard')
             ->assertSeeText($user->name)->assertSeeText($user->email)
-            ->assertSeeText('monitoring rebung bambu melalui node 1 dan node 2')
+            ->assertSeeText('Pantau larutan nutrisi dan iklim DFT melalui dua node.')
             ->assertDontSeeText('pembelajaran');
     }
 

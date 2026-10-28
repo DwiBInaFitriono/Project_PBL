@@ -792,11 +792,11 @@ void main() {
 
   test('trailing slash normalization preserves a deployment prefix', () async {
     final api = ApiClient(
-      baseUrl: ' https://example.test/rebung/api/v1/// ',
+      baseUrl: ' https://example.test/hidroponik/api/v1/// ',
       client: MockClient((request) async {
         expect(
           request.url.toString(),
-          'https://example.test/rebung/api/v1/auth/login',
+          'https://example.test/hidroponik/api/v1/auth/login',
         );
         return loginResponse();
       }),
