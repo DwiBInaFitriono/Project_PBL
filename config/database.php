@@ -59,7 +59,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (defined('Pdo\Mysql::ATTR_SSL_CA') ? constant('Pdo\Mysql::ATTR_SSL_CA') : (defined('PDO::MYSQL_ATTR_SSL_CA') ? PDO::MYSQL_ATTR_SSL_CA : 1009)) => env('MYSQL_ATTR_SSL_CA', file_exists(database_path('certs/isrgrootx1.pem')) ? database_path('certs/isrgrootx1.pem') : null),
+                (defined('Pdo\Mysql::ATTR_SSL_CA') ? constant('Pdo\Mysql::ATTR_SSL_CA') : (defined('PDO::MYSQL_ATTR_SSL_CA') ? PDO::MYSQL_ATTR_SSL_CA : 1009)) => env('MYSQL_ATTR_SSL_CA', (str_contains((string) env('DB_HOST'), 'tidb') && file_exists(database_path('certs/isrgrootx1.pem'))) ? database_path('certs/isrgrootx1.pem') : null),
             ]) : [],
         ],
 
@@ -79,7 +79,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (defined('Pdo\Mysql::ATTR_SSL_CA') ? constant('Pdo\Mysql::ATTR_SSL_CA') : (defined('PDO::MYSQL_ATTR_SSL_CA') ? PDO::MYSQL_ATTR_SSL_CA : 1009)) => env('MYSQL_ATTR_SSL_CA', file_exists(database_path('certs/isrgrootx1.pem')) ? database_path('certs/isrgrootx1.pem') : null),
+                (defined('Pdo\Mysql::ATTR_SSL_CA') ? constant('Pdo\Mysql::ATTR_SSL_CA') : (defined('PDO::MYSQL_ATTR_SSL_CA') ? PDO::MYSQL_ATTR_SSL_CA : 1009)) => env('MYSQL_ATTR_SSL_CA', (str_contains((string) env('DB_HOST'), 'tidb') && file_exists(database_path('certs/isrgrootx1.pem'))) ? database_path('certs/isrgrootx1.pem') : null),
             ]) : [],
         ],
 
