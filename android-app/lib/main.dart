@@ -42,7 +42,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'Rebung Pintar',
+    title: 'Hidroponik',
     locale: const Locale('id'),
     supportedLocales: const [Locale('id')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,

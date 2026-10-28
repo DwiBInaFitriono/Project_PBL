@@ -21,6 +21,10 @@ class MonitoringSnapshot
             $nodeSensors = [];
 
             foreach ($sensors as $sensor) {
+                if (($sensor['node_id'] ?? null) !== $definition['id']) {
+                    continue;
+                }
+
                 $query = SensorReading::query()->valid()
                     ->where('node_id', $definition['id'])
                     ->where('sensor_id', $sensor['id'])

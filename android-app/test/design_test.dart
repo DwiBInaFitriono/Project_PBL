@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rebung_pintar/main.dart';
-import 'package:rebung_pintar/dashboard_widgets.dart';
-import 'package:rebung_pintar/app_sidebar.dart';
+import 'package:hidroponik_dft/main.dart';
+import 'package:hidroponik_dft/dashboard_widgets.dart';
+import 'package:hidroponik_dft/app_sidebar.dart';
 
 void main() {
   for (final target in ['history', 'esp', 'account']) {
@@ -76,8 +76,8 @@ void main() {
     expect(words, lessThan(160));
     expect(find.text('PRATINJAU · Belum terhubung'), findsOneWidget);
     expect(find.text('Belum ada pembacaan'), findsNothing);
-    expect(find.byKey(const Key('sensor-1-temperature')), findsOneWidget);
-    expect(tester.getSize(find.byType(NodeCard).first).height, lessThan(300));
+    expect(find.byKey(const Key('sensor-1-ph')), findsOneWidget);
+    expect(tester.getSize(find.byType(NodeCard).first).height, lessThan(330));
     await tester.tap(find.byTooltip('Tentang status data'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Data kosong bukan nol'), findsOneWidget);

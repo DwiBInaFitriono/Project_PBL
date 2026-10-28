@@ -6,8 +6,8 @@ test('ekspor menampilkan laporan siap PDF bukan CSV', async ({ page, renderRespo
         const url = new URL(route.request().url());
         return route.fulfill(renderResponse(url.pathname + url.search));
     });
-    await page.goto('/history/export?node=2&sensor=temperature&from=2026-01-01&to=2026-01-02');
-    await expect(page.locator('body')).toContainText('Rebung Pintar');
+    await page.goto('/history/export?node=2&sensor=air_temperature&from=2026-01-01&to=2026-01-02');
+    await expect(page.locator('body')).toContainText('Hidroponik DFT');
     await expect(page.locator('body')).toContainText('2026-01-01');
     await expect(page.locator('#print-report')).toBeVisible();
     await page.evaluate(() => { window.__printCalled = false; window.print = () => { window.__printCalled = true; }; });

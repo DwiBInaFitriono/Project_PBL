@@ -1,4 +1,4 @@
-# Rebung Pintar — Flutter
+# Hidroponik DFT — Flutter
 
 Aplikasi terhubung ke REST Laravel berversi `/api/v1`: login/logout, monitoring berkala, grafik/ringkasan dari pembacaan server, riwayat WIB dengan filter/pagination, profil hanya baca, serta konfigurasi ESP khusus Operator.
 
@@ -29,7 +29,7 @@ APK: `build/app/outputs/flutter-apk/app-debug.apk`. Build lokal ini ditujukan un
 
 ## Signing release
 
-Release tidak memakai debug key. Gradle membaca `android/key.properties` (diabaikan Git); keystore dan salinan properti pemulihan disimpan di `C:\Users\Dwi Bina Fitriono\.rebung-pintar-signing\`. Hak akses hanya pengguna Windows saat ini dan SYSTEM. Jangan membagikan atau memasukkan file ini ke repository/APK. Cadangkan folder signing secara terenkripsi di lokasi lain: kehilangan kunci berarti tidak dapat menandatangani pembaruan aplikasi dengan identitas yang sama.
+Release tidak memakai debug key. Gradle membaca `android/key.properties` (diabaikan Git); keystore dan salinan properti pemulihan disimpan di `C:\Users\Dwi Bina Fitriono\.hidroponik-dft-signing\`. Hak akses hanya pengguna Windows saat ini dan SYSTEM. Jangan membagikan atau memasukkan file ini ke repository/APK. Cadangkan folder signing secara terenkripsi di lokasi lain: kehilangan kunci berarti tidak dapat menandatangani pembaruan aplikasi dengan identitas yang sama.
 
 Build release tanpa konfigurasi signing yang lengkap ditolak sebelum kompilasi. Keystore tidak boleh diganti untuk pembaruan aplikasi yang sudah didistribusikan.
 

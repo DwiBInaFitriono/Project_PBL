@@ -3,7 +3,7 @@
         <section class="settings-intro" aria-labelledby="settings-title">
             <p class="eyebrow">KONFIGURASI PERANGKAT</p>
             <h1 id="settings-title">Setting ESP</h1>
-            <p>Ringkasan rancangan perangkat untuk monitoring rebung bambu melalui node 1 dan node 2.</p>
+            <p>Ringkasan rancangan perangkat untuk monitoring hidroponik DFT melalui Node Nutrisi dan Node Iklim.</p>
         </section>
 
         <section class="settings-panel" aria-labelledby="integration-title">

@@ -37,7 +37,7 @@ class MonitoringDataTest extends TestCase
         $this->getJson('/monitoring/data')->assertUnauthorized();
         config(['monitoring.stale_after_seconds' => 60, 'monitoring.poll_interval_seconds' => 20]);
         $this->freezeTime();
-        SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'temperature', 'value' => 0, 'recorded_at' => now()->subSeconds(60)]);
+        SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'air_temperature', 'value' => 0, 'recorded_at' => now()->subSeconds(60)]);
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->getJson('/monitoring/data?node=2');
@@ -61,7 +61,7 @@ class MonitoringDataTest extends TestCase
         $this->travelTo(Carbon::parse('2026-09-16 12:00:00', 'UTC'));
         $rows = [];
         for ($index = 0; $index < 502; $index++) {
-            $rows[] = ['node_id' => '2', 'sensor_id' => 'temperature', 'value' => $index, 'recorded_at' => now()->subSeconds(502 - $index)];
+            $rows[] = ['node_id' => '2', 'sensor_id' => 'air_temperature', 'value' => $index, 'recorded_at' => now()->subSeconds(502 - $index)];
         }
         DB::table('sensor_readings')->insert($rows);
         SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'air_humidity', 'recorded_at' => now()->subDay()]);
@@ -70,7 +70,7 @@ class MonitoringDataTest extends TestCase
         $data = app(MonitoringSnapshot::class)->forNode('2');
 
         $this->assertCount(1, $data['nodes']);
-        $this->assertSame(3, $data['sensorCount']);
+        $this->assertSame(4, $data['sensorCount']);
         $this->assertSame('2', $data['nodes'][0]['id']);
         $points = $data['nodes'][0]['sensors'][0]['readings'];
         $this->assertCount(500, $points);
@@ -82,12 +82,12 @@ class MonitoringDataTest extends TestCase
     public function test_snapshot_uses_latest_valid_readings_without_promoting_missing_sensors(): void
     {
         $this->travelTo(Carbon::parse('2026-09-16 12:00:00', 'UTC'));
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'value' => 25, 'recorded_at' => now()->subMinutes(6)]);
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'value' => 0, 'recorded_at' => now()->subSeconds(30)]);
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'value' => 99, 'recorded_at' => now()->addSecond()]);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'value' => 6.0, 'recorded_at' => now()->subMinutes(6)]);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'value' => 0, 'recorded_at' => now()->subSeconds(30)]);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'value' => 99, 'recorded_at' => now()->addSecond()]);
         SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'air_humidity', 'value' => 61, 'recorded_at' => now()->subDays(2)]);
         foreach (['NaN', 'not-a-number', 'INF', '1e9999'] as $invalid) {
-            DB::table('sensor_readings')->insert(['node_id' => '1', 'sensor_id' => 'temperature', 'value' => $invalid, 'recorded_at' => now()]);
+            DB::table('sensor_readings')->insert(['node_id' => '1', 'sensor_id' => 'ph', 'value' => $invalid, 'recorded_at' => now()]);
         }
         SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'unknown', 'value' => 3]);
 
@@ -100,7 +100,7 @@ class MonitoringDataTest extends TestCase
         $this->assertSame(0.0, $sensor['value']);
         $this->assertSame(now()->subSeconds(30)->toIso8601String(), $sensor['last_reading']);
         $this->assertSame([
-            ['recorded_at' => now()->subMinutes(6)->toIso8601String(), 'value' => 25.0],
+            ['recorded_at' => now()->subMinutes(6)->toIso8601String(), 'value' => 6.0],
             ['recorded_at' => now()->subSeconds(30)->toIso8601String(), 'value' => 0.0],
         ], $sensor['readings']);
         $this->assertNull($data['nodes'][0]['sensors'][1]['last_reading']);
@@ -118,7 +118,7 @@ class MonitoringDataTest extends TestCase
 
         $data = app(MonitoringSnapshot::class)->forNode();
 
-        $this->assertSame(6, $data['sensorCount']);
+        $this->assertSame(8, $data['sensorCount']);
         $this->assertSame(now()->toIso8601String(), $data['monitoring']['generatedAt']);
         $this->assertSame(300, $data['monitoring']['staleAfterSeconds'] ?? null);
         $this->assertSame(15, $data['monitoring']['pollIntervalSeconds'] ?? null);

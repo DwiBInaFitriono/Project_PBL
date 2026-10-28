@@ -19,7 +19,7 @@ class SnapshotBoundaryTest extends TestCase
         $first = User::factory()->create();
         $second = User::factory()->create();
         $this->actingAs($first);
-        $paths = ['/dashboard?sensor=invalid', '/nodes/1?hours=5', '/nodes/2?sensor[]=temperature', '/monitoring/data?node=invalid'];
+        $paths = ['/dashboard?sensor=invalid', '/nodes/1?hours=5', '/nodes/2?sensor[]=ph', '/monitoring/data?node=invalid'];
 
         for ($attempt = 0; $attempt < 120; $attempt++) {
             $index = $attempt % count($paths);
@@ -55,7 +55,7 @@ class SnapshotBoundaryTest extends TestCase
         });
 
         foreach (['/dashboard', '/nodes/1', '/nodes/2'] as $path) {
-            foreach (['sensor=invalid', 'sensor[]=temperature', 'hours=5', 'hours[]=6'] as $query) {
+            foreach (['sensor=invalid', 'sensor[]=ph', 'hours=5', 'hours[]=6'] as $query) {
                 $this->getJson($path.'?'.$query)->assertNotFound();
             }
         }

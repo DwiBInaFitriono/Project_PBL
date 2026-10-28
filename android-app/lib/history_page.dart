@@ -253,8 +253,13 @@ class _HistoryPageState extends State<HistoryPage> {
   String _date(DateTime date) =>
       '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   String _description() => _describe(_captureFilters());
-  String _describe(_HistoryFilters filters) =>
-      '${filters.node.isEmpty ? 'Semua node' : 'Node ${filters.node}'} · ${filters.sensor.isEmpty ? 'Semua parameter' : sensors.firstWhere((s) => s.id == filters.sensor).name}\n${_date(filters.from)} — ${_date(filters.to)} WIB';
+  String _describe(_HistoryFilters filters) {
+    final sensor = sensors.where((item) => item.id == filters.sensor).firstOrNull;
+    final sensorLabel = filters.sensor.isEmpty
+        ? 'Semua parameter'
+        : sensor?.name ?? 'Parameter tidak dikenal';
+    return '${filters.node.isEmpty ? 'Semua node' : 'Node ${filters.node}'} · $sensorLabel\n${_date(filters.from)} — ${_date(filters.to)} WIB';
+  }
 
   Future<void> _pickDate(bool from) async {
     final chosen = await showDatePicker(
@@ -405,7 +410,9 @@ class _HistoryPageState extends State<HistoryPage> {
     final rows = _response?['data'] as List<dynamic>? ?? [];
     if (rows.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tidak ada data pembacaan untuk diekspor.')),
+        const SnackBar(
+          content: Text('Tidak ada data pembacaan untuk diekspor.'),
+        ),
       );
       return;
     }
@@ -428,7 +435,6 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
     );
   }
-
 
   Widget _select(
     String label,

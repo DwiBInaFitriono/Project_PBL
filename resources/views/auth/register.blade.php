@@ -1,7 +1,7 @@
 <x-auth-layout title="Daftar" page="register">
-    <div class="eyebrow"><span></span> AKUN REBUNG PINTAR</div>
-    <h1>Buat akun Rebung Pintar.</h1>
-    <p class="form-intro">Daftar untuk mengakses sistem monitoring rebung bambu melalui node 1 dan node 2.</p>
+    <div class="eyebrow"><span></span> AKUN HIDROPONIK DFT</div>
+    <h1>Buat akun Hidroponik DFT.</h1>
+    <p class="form-intro">Daftar untuk mengakses sistem monitoring hidroponik DFT melalui Node Nutrisi dan Node Iklim.</p>
     <x-auth-tabs active="register" />
 
     <form action="{{ route('register.store') }}" method="POST" class="auth-form">

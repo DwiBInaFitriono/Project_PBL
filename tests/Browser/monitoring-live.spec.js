@@ -29,11 +29,11 @@ test('sesi habis memberi peringatan dan mengarahkan ke login', async ({ page, re
 test('umur data tampil dan polling memperbarui sensor tanpa reload', async ({ page, renderPage }) => {
     const start = new Date('2026-01-01T10:00:00Z');
     await page.clock.install({ time: start });
-    const sensor = { id: 'temperature', name: 'Suhu udara', unit: '°C', decimals: 1 };
+    const sensor = { id: 'air_temperature', name: 'Suhu udara', unit: '°C', decimals: 1 };
     const payload = (value, generatedAt, recorded_at) => ({
         generatedAt, staleAfterSeconds: 300, pollIntervalSeconds: 15,
         sensors: [sensor],
-        nodes: [{ id: '2', name: 'Node 2', last_reading: recorded_at,
+        nodes: [{ id: '2', name: 'Node Iklim', last_reading: recorded_at,
             sensors: [{ ...sensor, value, last_reading: recorded_at, readings: [{ value, recorded_at }] }] }],
     });
     const initial = payload(0, start.toISOString(), '2026-01-01T09:50:00Z');
@@ -65,18 +65,18 @@ test('umur data tampil dan polling memperbarui sensor tanpa reload', async ({ pa
 test('sensor dan waktu sinkron dengan URL sidebar reload dan tombol kembali', async ({ page, renderPage }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await routePages(page, renderPage);
-    await page.goto('/nodes/2?sensor=temperature&hours=6#tren');
-    await page.getByRole('button', { name: 'Kelembapan tanah', exact: true }).click();
-    await expect(page).toHaveURL(/sensor=soil_moisture&hours=6#tren$/);
+    await page.goto('/nodes/2?sensor=air_temperature&hours=6#tren');
+    await page.getByRole('button', { name: 'Debit air', exact: true }).click();
+    await expect(page).toHaveURL(/sensor=water_flow&hours=6#tren$/);
     const active = page.locator('#node-2-menu a[aria-current="page"]');
-    await expect(active).toHaveText('Kelembapan tanah');
+    await expect(active).toHaveText('Debit air');
     await page.getByRole('button', { name: '1 jam', exact: true }).click();
-    await expect(page).toHaveURL(/sensor=soil_moisture&hours=1#tren$/);
+    await expect(page).toHaveURL(/sensor=water_flow&hours=1#tren$/);
     await page.goBack();
     await expect(page.getByRole('button', { name: '6 jam', exact: true })).toHaveAttribute('aria-pressed', 'true');
     await page.reload();
-    await expect(page.locator('[data-active-sensor]')).toHaveText('Kelembapan tanah · %');
-    await expect(active).toHaveText('Kelembapan tanah');
+    await expect(page.locator('[data-active-sensor]')).toHaveText('Debit air · L/menit');
+    await expect(active).toHaveText('Debit air');
     await page.getByRole('link', { name: 'Muat ulang', exact: true }).click();
-    await expect(page).toHaveURL(/sensor=soil_moisture&hours=6#tren$/);
+    await expect(page).toHaveURL(/sensor=water_flow&hours=6#tren$/);
 });

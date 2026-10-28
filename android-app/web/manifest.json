@@ -1,11 +1,11 @@
 {
-    "name": "Rebung Pintar",
-    "short_name": "Rebung Pintar",
+    "name": "Hidroponik DFT",
+    "short_name": "Hidroponik DFT",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#F2F1EF",
     "theme_color": "#F2F1EF",
-    "description": "Aplikasi monitoring Rebung Pintar.",
+    "description": "Aplikasi monitoring Hidroponik DFT.",
     "orientation": "any",
     "prefer_related_applications": false,
     "icons": [

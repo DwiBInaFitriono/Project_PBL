@@ -18,18 +18,18 @@ class NodePageTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/nodes/'.$id)
             ->assertOk()
             ->assertViewIs('nodes.show')
-            ->assertSeeText('Monitoring Node '.$id)
-            ->assertViewHas('node', fn (array $node): bool => $node['id'] === $id && count($node['sensors']) === 3)
+            ->assertSeeText('Monitoring '.config('monitoring.nodes.'.((int) $id - 1).'.name'))
+            ->assertViewHas('node', fn (array $node): bool => $node['id'] === $id && count($node['sensors']) === ($id === '1' ? 3 : 4))
             ->assertViewHas('monitoring', fn (array $data): bool => count($data['nodes']) === 1 && $data['nodes'][0]['id'] === $id);
     }
 
     public function test_node_sensor_link_selects_the_requested_parameter(): void
     {
         $this->withoutVite();
-        $this->actingAs(User::factory()->create())->get('/nodes/2?sensor=soil_moisture')
+        $this->actingAs(User::factory()->create())->get('/nodes/2?sensor=air_humidity')
             ->assertOk()
-            ->assertViewHas('activeSensor', 'soil_moisture')
-            ->assertViewHas('monitoring', fn (array $data): bool => $data['activeSensor'] === 'soil_moisture');
+            ->assertViewHas('activeSensor', 'air_humidity')
+            ->assertViewHas('monitoring', fn (array $data): bool => $data['activeSensor'] === 'air_humidity');
     }
 
     public function test_unknown_node_or_sensor_returns_not_found(): void

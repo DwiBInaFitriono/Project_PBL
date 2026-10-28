@@ -19,18 +19,18 @@ for (const theme of ['light', 'dark']) {
         await expect(list).toBeVisible();
         await expect(list).toHaveCSS('border-radius', '10px');
         await expect(list).toHaveCSS('background-color', theme === 'dark' ? 'rgb(17, 31, 64)' : 'rgb(250, 249, 247)');
-        await list.getByRole('option', { name: 'Node 2', exact: true }).click();
-        await expect(node).toContainText('Node 2');
+        await list.getByRole('option', { name: 'Node Iklim', exact: true }).click();
+        await expect(node).toContainText('Node Iklim');
         await expect(list).toBeHidden();
         await expect(page.locator('select[name="node"]')).toHaveValue('2');
         await page.getByRole('combobox', { name: 'Parameter', exact: true }).click();
-        await page.getByRole('option', { name: 'Kelembapan tanah', exact: true }).click();
+        await page.getByRole('option', { name: 'Debit air', exact: true }).click();
         await page.getByRole('button', { name: 'Terapkan filter', exact: true }).click();
         await expect(page).toHaveURL(/node=2/);
-        await expect(page).toHaveURL(/sensor=soil_moisture/);
-        await expect(page.getByRole('combobox', { name: 'Parameter', exact: true })).toContainText('Kelembapan tanah');
+        await expect(page).toHaveURL(/sensor=water_flow/);
+        await expect(page.getByRole('combobox', { name: 'Parameter', exact: true })).toContainText('Debit air');
         await page.reload();
-        await expect(page.getByRole('combobox', { name: 'Node', exact: true })).toContainText('Node 2');
+        await expect(page.getByRole('combobox', { name: 'Node', exact: true })).toContainText('Node Iklim');
     });
 }
 
@@ -41,12 +41,12 @@ test('dropdown mendukung keyboard Escape Tab dan klik di luar', async ({ page, r
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('End');
     await page.keyboard.press('Enter');
-    await expect(node).toContainText('Node 2');
+    await expect(node).toContainText('Node Iklim');
     await expect(node).toBeFocused();
     await page.keyboard.press('Space');
     await page.keyboard.press('Home');
     await page.keyboard.press('Escape');
-    await expect(node).toContainText('Node 2');
+    await expect(node).toContainText('Node Iklim');
     await expect(node).toHaveAttribute('aria-expanded', 'false');
     await node.click();
     await page.keyboard.press('Tab');
@@ -97,7 +97,7 @@ test('pencarian ketik dan reset mengembalikan pilihan awal', async ({ page, rend
     await sensor.focus();
     await page.keyboard.type('Suhu');
     await page.keyboard.press('Enter');
-    await expect(sensor).toContainText('Suhu udara');
+    await expect(sensor).toContainText('Suhu air');
     await page.getByRole('button', { name: 'Terapkan filter', exact: true }).click();
     await page.getByRole('link', { name: 'Reset filter', exact: true }).click();
     await expect(page.getByRole('combobox', { name: 'Parameter', exact: true })).toContainText('Semua parameter');
@@ -110,7 +110,7 @@ test('muat ulang berupa ikon persegi dan masih mempertahankan filter', async ({ 
         return route.fulfill({ contentType: 'text/html', body: renderPage(url.pathname + url.search) });
     });
     for (const path of ['/dashboard', '/nodes/2']) {
-        await page.goto(`${path}?sensor=soil_moisture&hours=6`);
+        await page.goto(`${path}?sensor=water_flow&hours=6`);
         const reload = page.getByRole('link', { name: 'Muat ulang', exact: true });
         expect((await reload.innerText()).trim()).toBe('');
         await expect(reload).toHaveAttribute('title', 'Muat ulang');
@@ -119,6 +119,6 @@ test('muat ulang berupa ikon persegi dan masih mempertahankan filter', async ({ 
         expect(box.width).toBe(44);
         expect(box.height).toBe(44);
         await reload.click();
-        await expect(page).toHaveURL(/sensor=soil_moisture&hours=6$/);
+        await expect(page).toHaveURL(/sensor=water_flow&hours=6$/);
     }
 });

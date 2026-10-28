@@ -62,14 +62,30 @@ class RestApiTest extends TestCase
         $this->postJson('/api/v1/auth/login', ['email' => [], 'password' => str_repeat('a', 73)])->assertUnprocessable()->assertJsonValidationErrors(['email', 'password', 'device_name']);
     }
 
+    public function test_analytics_reports_hydroponic_nutrient_ranges_for_kangkung_and_pakcoy(): void
+    {
+        $this->travelTo(now()->setDate(2026, 9, 16)->setTime(12, 0));
+        $token = User::factory()->create()->createToken('test', ['mobile:read'])->plainTextToken;
+        SensorReading::create(['node_id' => '1', 'sensor_id' => 'ph', 'value' => 6.2, 'recorded_at' => now()->subMinute()]);
+
+        $this->withToken($token)->getJson('/api/v1/analytics?node=1')->assertOk()
+            ->assertJsonPath('data.nodes.0.node_id', '1')
+            ->assertJsonPath('data.nodes.0.nutrient_assessment.ph.value', 6.2)
+            ->assertJsonPath('data.nodes.0.nutrient_assessment.ph.plants.kangkung.status', 'Dalam rentang')
+            ->assertJsonPath('data.nodes.0.nutrient_assessment.ph.plants.pakcoy.status', 'Dalam rentang')
+            ->assertJsonMissingPath('data.nodes.0.nutrient_assessment.tds')
+            ->assertJsonMissingPath('data.nodes.0.vpd')
+            ->assertJsonMissingPath('data.nodes.0.soil_assessment');
+    }
+
     public function test_api_monitoring_and_history_share_real_readings_and_enforce_operator_gate(): void
     {
         $this->travelTo(now()->setDate(2026, 9, 16)->setTime(12, 0));
         $user = User::factory()->create();
         $token = $user->createToken('test', ['mobile:read'])->plainTextToken;
-        $reading = SensorReading::create(['node_id' => '1', 'sensor_id' => 'temperature', 'value' => 0, 'recorded_at' => now()->subMinute()]);
+        $reading = SensorReading::create(['node_id' => '1', 'sensor_id' => 'ph', 'value' => 0, 'recorded_at' => now()->subMinute()]);
         $this->withToken($token)->getJson('/api/v1/monitoring')->assertOk()->assertJsonPath('data.nodes.0.sensors.0.value', 0)->assertJsonPath('data.nodes.1.sensors.0.value', null);
-        $this->withToken($token)->getJson('/api/v1/history?node=1&sensor=temperature&from=2026-09-16&to=2026-09-16')->assertOk()->assertJsonPath('data.0.id', $reading->id)->assertJsonPath('meta.total', 1)->assertJsonPath('filters.timezone', 'Asia/Jakarta');
+        $this->withToken($token)->getJson('/api/v1/history?node=1&sensor=ph&from=2026-09-16&to=2026-09-16')->assertOk()->assertJsonPath('data.0.id', $reading->id)->assertJsonPath('meta.total', 1)->assertJsonPath('filters.timezone', 'Asia/Jakarta');
         $this->withToken($token)->getJson('/api/v1/history?node=9')->assertUnprocessable();
         $this->withToken($token)->getJson('/api/v1/settings/esp')->assertForbidden();
         Auth::forgetGuards();

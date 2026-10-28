@@ -3,7 +3,7 @@
     <section class="history-page" aria-labelledby="history-title">
         <div class="section-heading">
             <div>
-                <p class="eyebrow">Monitoring rebung bambu</p>
+                <p class="eyebrow">Monitoring hidroponik DFT</p>
                 <h1 id="history-title">Riwayat pembacaan</h1>
                 <p>Tanggal filter dan waktu pembacaan mengikuti zona waktu {{ $timezoneLabel }}. Rentang filter maksimal 366 hari. Data tersimpan tetap dalam UTC.</p>
             </div>

@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:rebung_pintar/api_client.dart';
-import 'package:rebung_pintar/history_page.dart';
-import 'package:rebung_pintar/settings_pages.dart';
+import 'package:hidroponik_dft/api_client.dart';
+import 'package:hidroponik_dft/history_page.dart';
+import 'package:hidroponik_dft/settings_pages.dart';
 
 // Exercise the real read/validation path without credentials or a network.
 class ReadOnlyTestClient extends ApiClient {
@@ -39,7 +39,7 @@ Map<String, Object?> historyResponse({
       'id': page,
       'node_id': node,
       'node_name': 'Node $node',
-      'sensor_id': 'temperature',
+      'sensor_id': 'air_temperature',
       'sensor_name': 'Suhu udara',
       'unit': '°C',
       'value': value,
@@ -54,14 +54,14 @@ Map<String, Object?> historyResponse({
   },
   'filters': {
     'node': node,
-    'sensor': 'temperature',
+    'sensor': 'air_temperature',
     'from': '2026-08-02',
     'to': '2026-08-03',
     'timezone': 'Asia/Jakarta',
   },
 };
 
-HistoryDraft fixedDraft() => HistoryDraft(node: '2', sensor: 'temperature')
+HistoryDraft fixedDraft() => HistoryDraft(node: '2', sensor: 'air_temperature')
   ..from = DateTime.utc(2026, 8, 2)
   ..to = DateTime.utc(2026, 8, 3);
 
@@ -100,7 +100,7 @@ Object settingsPayload(bool esp, {String name = 'Dari server'}) => {
           ],
           'sensors': [
             {
-              'id': 'temperature',
+              'id': 'air_temperature',
               'name': 'Suhu udara',
               'unit': '°C',
               'decimals': 1,
@@ -117,14 +117,21 @@ Object settingsPayload(bool esp, {String name = 'Dari server'}) => {
 };
 
 void main() {
-  testWidgets('read-only profile exposes account values to accessibility', (tester) async {
+  testWidgets('read-only profile exposes account values to accessibility', (
+    tester,
+  ) async {
     final semantics = tester.ensureSemantics();
     try {
-      final api = ReadOnlyTestClient((_) => jsonResponse(settingsPayload(false)));
+      final api = ReadOnlyTestClient(
+        (_) => jsonResponse(settingsPayload(false)),
+      );
       addTearDown(api.dispose);
       await tester.pumpWidget(host(AccountSettingsPage(api: api)));
       await tester.pumpAndSettle();
-      expect(find.bySemanticsLabel('Alamat email: operator@example.invalid'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Alamat email: operator@example.invalid'),
+        findsOneWidget,
+      );
     } finally {
       semantics.dispose();
     }
@@ -233,7 +240,12 @@ void main() {
     expect(find.textContaining('Node 1 · Suhu udara\n'), findsOneWidget);
     await tester.pumpWidget(host(const EspSettingsPage()));
     await tester.pumpAndSettle();
-    expect(find.text('PRATINJAU · MQTT belum aktif.'), findsOneWidget);
+    expect(
+      find.text(
+        'PRATINJAU · Ingest perangkat melalui MQTT di server belum aktif.',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Belum terhubung'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
@@ -399,7 +411,7 @@ void main() {
           ],
           'sensors': [
             {
-              'id': 'temperature',
+              'id': 'air_temperature',
               'name': 'Suhu terkonfigurasi',
               'unit': '°C',
               'decimals': 1,
@@ -416,7 +428,7 @@ void main() {
     expect(requests.single.url.path, '/api/v1/settings/esp');
     expect(find.text('Kebun dari server'), findsOneWidget);
     expect(find.text('Suhu terkonfigurasi (°C)'), findsOneWidget);
-    expect(find.text('MQTT aktif di server'), findsOneWidget);
+    expect(find.text('Ingest MQTT aktif di server'), findsOneWidget);
     expect(find.text('Koneksi perangkat belum terverifikasi'), findsOneWidget);
     expect(find.textContaining('online'), findsNothing);
     expect(find.textContaining('PRATINJAU'), findsNothing);
@@ -609,7 +621,7 @@ void main() {
     expect(requests.single.url.path, '/api/v1/history');
     expect(requests.single.url.queryParameters, {
       'node': '2',
-      'sensor': 'temperature',
+      'sensor': 'air_temperature',
       'from': '2026-08-02',
       'to': '2026-08-03',
       'timezone': 'Asia/Jakarta',

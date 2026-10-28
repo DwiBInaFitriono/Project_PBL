@@ -48,8 +48,8 @@ for (const width of [320, 768, 1440]) {
                 }
                 if (path === 'esp') {
                     await expect(page.locator('main')).toContainText('Menunggu integrasi');
-                    await expect(page.locator('main')).toContainText('Node 1');
-                    await expect(page.locator('main')).toContainText('Node 2');
+                    await expect(page.locator('main')).toContainText('Node Nutrisi');
+                    await expect(page.locator('main')).toContainText('Node Iklim');
                     await expect(page.locator('main form')).toHaveCount(0);
                 } else {
                     await expect(page.getByLabel('Nama lengkap', { exact: true })).toHaveValue('Operator Uji');

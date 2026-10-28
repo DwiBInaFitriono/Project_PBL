@@ -17,8 +17,8 @@
                 {{ $slot }}
             </main>
             <footer class="page-footer">
-                <span>Rebung Pintar</span>
-                <span>Monitoring rebung bambu</span>
+                <span>Hidroponik DFT</span>
+                <span>Monitoring hidroponik DFT</span>
             </footer>
         </section>
     </div>

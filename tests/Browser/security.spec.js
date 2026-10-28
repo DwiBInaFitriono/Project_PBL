@@ -1,7 +1,7 @@
 import { test, expect } from './support/dashboard-fixture.js';
 
 test('CSP blocks injected inline scripts and handlers while trusted theme still runs', async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('rebung-pintar-theme', 'dark'));
+    await page.addInitScript(() => localStorage.setItem('hidroponik-dft-theme', 'dark'));
     await page.route('**/login', async (route) => {
         const response = await route.fetch();
         const body = (await response.text()).replace('</body>', '<script>window.untrustedInline = true</script><button id="untrusted-handler" onclick="window.untrustedHandler=true">Test</button></body>');
@@ -30,13 +30,13 @@ for (const width of [390, 1440]) {
             await page.goto(path);
             await page.getByRole('button', { name: '6 jam', exact: true }).click();
             await expect(page.locator('[data-select-range="6"]')).toHaveAttribute('aria-pressed', 'true');
-            await page.getByRole('button', { name: 'Kelembapan tanah', exact: true }).click();
-            await expect(page.locator('[data-active-sensor]')).toContainText('Kelembapan tanah');
+            await page.getByRole('button', { name: path === '/dashboard' ? 'pH nutrisi' : 'Suhu air', exact: true }).click();
+            await expect(page.locator('[data-active-sensor]')).toContainText(path === '/dashboard' ? 'pH nutrisi' : 'Suhu air');
             await page.locator('[data-theme-toggle]').click();
         }
         await page.goto('/history');
         await page.getByRole('combobox', { name: 'Node', exact: true }).click();
-        await page.getByRole('option', { name: 'Node 2', exact: true }).click();
+        await page.getByRole('option', { name: 'Node Iklim', exact: true }).click();
         await expect(page.locator('select[name="node"]')).toHaveValue('2');
         await page.getByRole('button', { name: 'Terapkan filter', exact: true }).click();
         await expect(page).toHaveURL(/node=2/);

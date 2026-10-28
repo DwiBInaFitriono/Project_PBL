@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rebung_pintar/main.dart';
+import 'package:hidroponik_dft/main.dart';
 
 void main() {
   testWidgets('tema terang dan gelap berubah tanpa menghapus input', (

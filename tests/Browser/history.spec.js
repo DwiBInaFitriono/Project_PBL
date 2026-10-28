@@ -12,19 +12,19 @@ for (const width of [360, 1440]) {
         const node = page.getByRole('combobox', { name: 'Node', exact: true });
         const sensor = page.getByRole('combobox', { name: 'Parameter', exact: true });
         await node.click();
-        await page.getByRole('option', { name: 'Node 2', exact: true }).click();
+        await page.getByRole('option', { name: 'Node Iklim', exact: true }).click();
         await sensor.click();
-        await page.getByRole('option', { name: 'Kelembapan tanah', exact: true }).click();
+        await page.getByRole('option', { name: 'Debit air', exact: true }).click();
         await page.locator('input[name="from"]').fill('2026-01-01');
         await page.locator('input[name="to"]').fill('2026-01-02');
         await page.locator('.history-filters button[type="submit"]').click();
         await expect(page).toHaveURL(/node=2/);
-        await expect(page.locator('select[name="sensor"]')).toHaveValue('soil_moisture');
+        await expect(page.locator('select[name="sensor"]')).toHaveValue('water_flow');
         const exportLink = page.locator('a[href*="/history/export"]');
         await expect(exportLink).toHaveAttribute('href', /node=2/);
         await expect(exportLink).toHaveAttribute('href', /from=2026-01-01/);
         await expect(exportLink).toHaveAttribute('href', /to=2026-01-02/);
-        await expect(exportLink).toHaveAttribute('href', /sensor=soil_moisture/);
+        await expect(exportLink).toHaveAttribute('href', /sensor=water_flow/);
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     });
 }

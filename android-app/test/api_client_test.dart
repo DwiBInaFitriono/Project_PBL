@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:rebung_pintar/api_client.dart';
+import 'package:hidroponik_dft/api_client.dart';
 
 const testUser = <String, dynamic>{
   'id': 1,
@@ -210,7 +210,12 @@ void main() {
           {'id': '1', 'name': 'Node 1'},
         ],
         'sensors': [
-          {'id': 'temperature', 'name': 'Suhu', 'unit': '°C', 'decimals': 1},
+          {
+            'id': 'air_temperature',
+            'name': 'Suhu',
+            'unit': '°C',
+            'decimals': 1,
+          },
         ],
         'integration': {'mqtt_enabled': false, 'hardware_connected': false},
       };
@@ -287,7 +292,7 @@ void main() {
           {
             'id': 12,
             'node_id': '1',
-            'sensor_id': 'temperature',
+            'sensor_id': 'air_temperature',
             'value': 0,
             'recorded_at': '2026-09-16T00:00:00Z',
             'node_name': 'Node 1',
@@ -303,7 +308,7 @@ void main() {
         },
         'filters': {
           'node': '1',
-          'sensor': 'temperature',
+          'sensor': 'air_temperature',
           'from': '2026-09-01',
           'to': '2026-09-16',
           'timezone': 'Asia/Jakarta',
@@ -317,7 +322,7 @@ void main() {
           expect(request.url.path, '/api/v1/history');
           expect(request.url.queryParameters, {
             'node': '1',
-            'sensor': 'temperature',
+            'sensor': 'air_temperature',
             'from': '2026-09-01',
             'to': '2026-09-16',
             'timezone': 'Asia/Jakarta',
@@ -338,7 +343,7 @@ void main() {
       expect(
         await api.history(
           node: '1',
-          sensor: 'temperature',
+          sensor: 'air_temperature',
           from: '2026-09-01',
           to: '2026-09-16',
           page: 2,
@@ -416,7 +421,7 @@ void main() {
             'last_reading': null,
             'sensors': [
               {
-                'id': 'temperature',
+                'id': 'air_temperature',
                 'name': 'Suhu',
                 'unit': '°C',
                 'decimals': 1,
@@ -439,7 +444,12 @@ void main() {
           },
         ],
         'sensors': [
-          {'id': 'temperature', 'name': 'Suhu', 'unit': '°C', 'decimals': 1},
+          {
+            'id': 'air_temperature',
+            'name': 'Suhu',
+            'unit': '°C',
+            'decimals': 1,
+          },
         ],
         'generatedAt': '2026-09-16T00:00:00Z',
         'staleAfterSeconds': 300,

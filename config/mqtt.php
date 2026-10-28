@@ -4,7 +4,7 @@ return [
     'enabled' => env('MQTT_ENABLED', false),
     'host' => env('MQTT_HOST', ''),
     'port' => env('MQTT_PORT', 8883),
-    'client_id' => env('MQTT_CLIENT_ID', 'rebung-pintar-ingestor'),
+    'client_id' => env('MQTT_CLIENT_ID', 'hidroponik-dft-ingestor'),
     'username' => env('MQTT_USERNAME'),
     'password' => env('MQTT_PASSWORD'),
     'tls' => env('MQTT_TLS', true),

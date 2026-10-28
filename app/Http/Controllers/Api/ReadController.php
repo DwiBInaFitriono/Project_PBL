@@ -45,41 +45,25 @@ class ReadController extends Controller
 
     public function analytics(Request $request, MonitoringSnapshot $snapshot, DataProcessingService $analytics): JsonResponse
     {
-        $nodeData = $snapshot->forNode($request->query('node'))['nodes'];
+        $validated = $request->validate(['node' => ['nullable', 'string', Rule::in(['1', '2'])]]);
+        $nodeData = $snapshot->forNode($validated['node'] ?? null)['nodes'];
         $processed = [];
 
         foreach ($nodeData as $node) {
-            $temp = null;
-            $hum = null;
-            $soil = null;
+            $measurements = ['ph' => null];
 
-            foreach ($node['sensors'] as $s) {
-                if ($s['id'] === 'temperature') {
-                    $temp = $s['value'] !== null ? (float) $s['value'] : null;
-                }
-                if ($s['id'] === 'air_humidity') {
-                    $hum = $s['value'] !== null ? (float) $s['value'] : null;
-                }
-                if ($s['id'] === 'soil_moisture') {
-                    $soil = $s['value'] !== null ? (float) $s['value'] : null;
+            foreach ($node['sensors'] as $sensor) {
+                if (array_key_exists($sensor['id'], $measurements) && $sensor['value'] !== null) {
+                    $measurements[$sensor['id']] = (float) $sensor['value'];
                 }
             }
-
-            $vpd = ($temp !== null && $hum !== null) ? $analytics->calculateVpd($temp, $hum) : null;
-            $vpdInfo = $vpd !== null ? $analytics->classifyVpd($vpd) : null;
-            $soilInfo = $soil !== null ? $analytics->evaluateSoilMoisture($soil) : null;
 
             $processed[] = [
                 'node_id' => $node['id'],
                 'node_name' => $node['name'],
                 'status' => $node['status'],
                 'last_reading' => $node['last_reading'],
-                'vpd' => [
-                    'value' => $vpd,
-                    'unit' => 'kPa',
-                    'assessment' => $vpdInfo,
-                ],
-                'soil_assessment' => $soilInfo,
+                'nutrient_assessment' => $analytics->assessNutrients($measurements),
             ];
         }
 

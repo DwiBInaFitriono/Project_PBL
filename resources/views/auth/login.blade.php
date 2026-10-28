@@ -1,7 +1,7 @@
 <x-auth-layout title="Masuk" page="login">
-    <div class="eyebrow"><span></span> MONITORING REBUNG BAMBU</div>
+    <div class="eyebrow"><span></span> MONITORING HIDROPONIK DFT</div>
     <h1>Selamat datang kembali.</h1>
-    <p class="form-intro">Masuk ke sistem monitoring rebung bambu melalui node 1 dan node 2.</p>
+    <p class="form-intro">Masuk ke sistem monitoring hidroponik DFT melalui Node Nutrisi dan Node Iklim.</p>
     <x-auth-tabs active="login" />
 
     <form action="{{ route('login.store') }}" method="POST" class="auth-form">

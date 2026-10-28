@@ -6,7 +6,7 @@
             <span class="node-mark" aria-hidden="true">{{ str_pad($node['id'], 2, '0', STR_PAD_LEFT) }}</span>
             <div>
                 <h3 id="node-{{ $node['id'] }}-title">{{ $node['name'] }}</h3>
-                <p>Pemantauan rebung bambu</p>
+                <p>Pemantauan hidroponik DFT</p>
             </div>
         </div>
         <span class="node-status"><span aria-hidden="true"></span><span data-node-status>{{ $node['status'] }}</span></span>

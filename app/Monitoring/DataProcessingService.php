@@ -5,98 +5,62 @@ namespace App\Monitoring;
 class DataProcessingService
 {
     /**
-     * Hitung Vapor Pressure Deficit (VPD) dalam satuan kiloPascal (kPa).
-     * VPD optimal untuk rebung bambu berada di kisaran 0.8 - 1.2 kPa.
+     * @return array{value: float|null, unit: string, plants: array<string, array{status: string, range: array{min: float, max: float}}>}
      */
-    public function calculateVpd(float $temperatureC, float $relativeHumidity): float
+    public function assessNutrientValue(string $metric, ?float $value): array
     {
-        if ($temperatureC <= -50.0 || $temperatureC >= 80.0 || $relativeHumidity < 0.0 || $relativeHumidity > 100.0) {
-            return 0.0;
+        $unit = $metric === 'ph' ? 'pH' : 'ppm';
+        $plants = [];
+
+        foreach (config('monitoring.plants', []) as $plantId => $plant) {
+            if (! isset($plant[$metric])) {
+                continue;
+            }
+            [$minimum, $maximum] = $plant[$metric];
+            $plants[$plantId] = [
+                'status' => $this->rangeStatus($value, (float) $minimum, (float) $maximum),
+                'range' => ['min' => (float) $minimum, 'max' => (float) $maximum],
+            ];
         }
 
-        // Saturated Vapor Pressure (SVP) berdasarkan rumus Tetens
-        $svp = 0.61078 * exp((17.27 * $temperatureC) / ($temperatureC + 237.3));
-
-        // Actual Vapor Pressure (AVP)
-        $avp = $svp * ($relativeHumidity / 100.0);
-
-        // VPD = SVP - AVP
-        return round(max(0.0, $svp - $avp), 2);
+        return ['value' => $value, 'unit' => $unit, 'plants' => $plants];
     }
 
     /**
-     * Klasifikasikan status VPD untuk panduan iklim mikro rebung bambu.
+     * @param  array{ph?: float|null}  $measurements
+     * @return array{ph: array{value: float|null, unit: string, plants: array<string, array{status: string, range: array{min: float, max: float}}>}}
      */
-    public function classifyVpd(float $vpdKpa): array
+    public function assessNutrients(array $measurements): array
     {
-        if ($vpdKpa < 0.4) {
-            return [
-                'status' => 'Sangat Rendah',
-                'description' => 'Transpirasi terhambat, kelembapan terlalu jenuh (risiko jamur/pembusukan).',
-                'color' => '#6A7FC0',
-            ];
-        }
-
-        if ($vpdKpa <= 1.2) {
-            return [
-                'status' => 'Optimal',
-                'description' => 'Kondisi iklim mikro optimal untuk laju fotosintesis dan pertumbuhan rebung.',
-                'color' => '#2E7D32',
-            ];
-        }
-
-        if ($vpdKpa <= 1.6) {
-            return [
-                'status' => 'Waspada Tinggi',
-                'description' => 'Udara kering, laju penguapan air mulai meningkat.',
-                'color' => '#F7B700',
-            ];
-        }
-
         return [
-            'status' => 'Kritis Kering',
-            'description' => 'Stres air parah, stomata menutup. Perlu peningkatan kelembapan segera.',
-            'color' => '#C62828',
+            'ph' => $this->assessNutrientValue('ph', $measurements['ph'] ?? null),
         ];
     }
 
-    /**
-     * Evaluasi kondisi kelembapan tanah dan rekomendasi irigasi.
-     */
-    public function evaluateSoilMoisture(float $soilMoisturePercent): array
+    public function rangeStatus(?float $value, float $minimum, float $maximum): string
     {
-        if ($soilMoisturePercent < 35.0) {
-            return [
-                'condition' => 'Kering',
-                'action_needed' => true,
-                'recommendation' => 'Aktifkan pompa irigasi untuk menyiram media perakaran.',
-            ];
+        if ($value === null) {
+            return 'Belum tersedia';
         }
 
-        if ($soilMoisturePercent <= 75.0) {
-            return [
-                'condition' => 'Ideal',
-                'action_needed' => false,
-                'recommendation' => 'Kelembapan tanah dalam kisaran ideal untuk penyerapan nutrisi rebung.',
-            ];
+        if ($value < $minimum) {
+            return 'Di bawah rentang';
         }
 
-        return [
-            'condition' => 'Terlalu Basah / Jenuh',
-            'action_needed' => false,
-            'recommendation' => 'Hentikan penyiraman, periksa drainase tanah untuk mencegah busuk tunas.',
-        ];
+        if ($value > $maximum) {
+            return 'Di atas rentang';
+        }
+
+        return 'Dalam rentang';
     }
 
     /**
-     * Ringkas kumpulan data titik numerik (Moving Average, Min, Max, Standar Deviasi).
-     *
      * @param  array<int, float>  $values
      * @return array<string, float|null>
      */
     public function summarize(array $values): array
     {
-        $filtered = array_values(array_filter($values, fn ($v): bool => is_numeric($v)));
+        $filtered = array_values(array_filter($values, fn ($value): bool => is_numeric($value)));
         $count = count($filtered);
 
         if ($count === 0) {
@@ -108,11 +72,11 @@ class DataProcessingService
             ];
         }
 
-        $avg = array_sum($filtered) / $count;
+        $average = array_sum($filtered) / $count;
 
         return [
             'count' => (float) $count,
-            'average' => round($avg, 2),
+            'average' => round($average, 2),
             'min' => round(min($filtered), 2),
             'max' => round(max($filtered), 2),
         ];

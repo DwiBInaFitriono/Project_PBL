@@ -22,7 +22,7 @@ class _DashboardPageState extends State<DashboardPage> {
   final _scaffold = GlobalKey<ScaffoldState>();
   final _scroll = ScrollController();
   String _destination = 'dashboard';
-  String _sensor = 'temperature';
+  String _sensor = 'ph';
   final _historyDrafts = <String, HistoryDraft>{};
   int _hours = 24;
   int? _expandedNode;

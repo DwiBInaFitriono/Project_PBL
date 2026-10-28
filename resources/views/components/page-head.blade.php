@@ -3,12 +3,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F2F1EF">
 <meta property="csp-nonce" nonce="{{ Vite::cspNonce() }}">
-<title>{{ $title }} — Rebung Pintar</title>
+<title>{{ $title }} - Hidroponik DFT</title>
 <script nonce="{{ Vite::cspNonce() }}">
     (() => {
         let theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         try {
-            const saved = localStorage.getItem('rebung-pintar-theme');
+            const saved = localStorage.getItem('hidroponik-dft-theme');
             if (saved === 'dark' || saved === 'light') theme = saved;
         } catch { /* Browser storage is optional. */ }
         document.documentElement.dataset.theme = theme;

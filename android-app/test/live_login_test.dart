@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:rebung_pintar/api_client.dart';
-import 'package:rebung_pintar/main.dart';
+import 'package:hidroponik_dft/api_client.dart';
+import 'package:hidroponik_dft/main.dart';
 
 final _user = {
   'id': 1,

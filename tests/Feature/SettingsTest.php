@@ -37,7 +37,7 @@ class SettingsTest extends TestCase
 
         $response->assertOk()->assertViewIs('settings.esp')
             ->assertSeeText('Setting ESP')
-            ->assertSeeText('Node 1')->assertSeeText('Node 2')
+            ->assertSeeText('Node Nutrisi')->assertSeeText('Node Iklim')
             ->assertSeeText('Menunggu integrasi')
             ->assertSeeText('Parameter usulan')
             ->assertSeeText('Protokol komunikasi belum ditentukan')

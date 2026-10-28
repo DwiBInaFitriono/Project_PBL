@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('halaman masuk menampilkan identitas dan formulir yang berlabel', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Masuk — Rebung Pintar');
+    await expect(page).toHaveTitle('Masuk - Hidroponik DFT');
     await expect(page.getByRole('heading', { name: 'Selamat datang kembali.' })).toBeVisible();
     await expect(page.getByLabel('Alamat email')).toBeVisible();
     await expect(page.getByLabel('Kata sandi', { exact: true })).toHaveAttribute('type', 'password');
@@ -21,11 +21,11 @@ test('formulir autentikasi satu kolom di tengah tanpa panel samping', async ({ p
     }
 });
 
-test('identitas aplikasi adalah monitoring rebung bambu melalui dua node', async ({ page }) => {
+test('identitas aplikasi adalah monitoring hidroponik DFT melalui dua node', async ({ page }) => {
     for (const route of ['/login', '/register']) {
         await page.goto(route);
-        await expect(page.locator('.form-content')).toContainText('rebung bambu');
-        await expect(page.locator('.form-content')).toContainText('node 1 dan node 2');
+        await expect(page.locator('.form-content')).toContainText('hidroponik DFT');
+        await expect(page.locator('.form-content')).toContainText('Node Nutrisi dan Node Iklim');
         await expect(page.locator('body')).not.toContainText(/belajar|pembelajaran|rasa ingin tahu/i);
     }
 });
@@ -99,13 +99,13 @@ test('tema gelap tersimpan saat pindah halaman dan reload', async ({ page }) => 
     await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(10, 21, 48)');
     await expect(page.getByRole('button', { name: 'Aktifkan mode terang' })).toHaveAttribute('aria-pressed', 'true');
     await page.getByRole('link', { name: 'Buat akun', exact: true }).click();
-    await expect(page).toHaveTitle('Daftar — Rebung Pintar');
+    await expect(page).toHaveTitle('Daftar - Hidroponik DFT');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await page.getByRole('button', { name: 'Aktifkan mode terang' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    expect(await page.evaluate(() => localStorage.getItem('rebung-pintar-theme'))).toBe('light');
+    expect(await page.evaluate(() => localStorage.getItem('hidroponik-dft-theme'))).toBe('light');
 });
 
 test('kata sandi dapat ditampilkan dan disembunyikan tanpa mengirim form', async ({ page }) => {
@@ -121,7 +121,7 @@ test('kata sandi dapat ditampilkan dan disembunyikan tanpa mengirim form', async
 });
 
 test('preferensi gelap diterapkan sebelum JavaScript utama dimuat', async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('rebung-pintar-theme', 'dark'));
+    await page.addInitScript(() => localStorage.setItem('hidroponik-dft-theme', 'dark'));
     await page.route('**/build/assets/*.js', (route) => route.abort());
     await page.goto('/login');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');

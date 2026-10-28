@@ -47,16 +47,16 @@ class MqttCommandsTest extends TestCase
         }), true);
         $callbacks = [];
         $client->expects($this->exactly(2))->method('subscribe')->willReturnCallback(function (string $topic, callable $callback, int $qos) use (&$callbacks): void {
-            $this->assertContains($topic, ['rebung-pintar/v1/nodes/1/telemetry', 'rebung-pintar/v1/nodes/2/telemetry']);
+            $this->assertContains($topic, ['hidroponik/v1/nodes/1/telemetry', 'hidroponik/v1/nodes/2/telemetry']);
             $this->assertSame(1, $qos);
             $callbacks[$topic] = $callback;
         });
         $client->method('registerLoopEventHandler')->willReturnSelf();
         $client->expects($this->once())->method('loop')->willReturnCallback(function () use (&$callbacks): void {
-            $topic = 'rebung-pintar/v1/nodes/1/telemetry';
+            $topic = 'hidroponik/v1/nodes/1/telemetry';
             $callbacks[$topic]($topic, json_encode([
                 'schema_version' => 1, 'message_id' => '5ef03860-30ae-44b2-a946-2ec66b397510', 'node_id' => '1',
-                'recorded_at' => now('UTC')->toIso8601String(), 'readings' => ['temperature' => 27.5],
+                'recorded_at' => now('UTC')->toIso8601String(), 'readings' => ['ph' => 27.5],
             ], JSON_THROW_ON_ERROR), false, []);
         });
         $client->expects($this->once())->method('interrupt');
@@ -65,7 +65,7 @@ class MqttCommandsTest extends TestCase
 
         $this->artisan('mqtt:subscribe', ['--once' => true, '--timeout' => 1])->assertSuccessful();
         $this->assertDatabaseCount('mqtt_messages', 1);
-        $this->assertDatabaseHas('sensor_readings', ['node_id' => '1', 'sensor_id' => 'temperature', 'value' => 27.5]);
+        $this->assertDatabaseHas('sensor_readings', ['node_id' => '1', 'sensor_id' => 'ph', 'value' => 27.5]);
     }
 
     public function test_timeout_interrupts_and_once_without_messages_fails(): void
@@ -142,10 +142,10 @@ class MqttCommandsTest extends TestCase
     public function test_subscription_status_requires_exact_acknowledged_topics_and_resets(): void
     {
         $repository = new SubscriptionRepository;
-        $topics = ['rebung-pintar/v1/nodes/1/telemetry', 'rebung-pintar/v1/nodes/2/telemetry'];
+        $topics = ['hidroponik/v1/nodes/1/telemetry', 'hidroponik/v1/nodes/2/telemetry'];
         $this->assertFalse($repository->hasAcknowledgedSubscriptions([]));
         $this->assertFalse($repository->hasAcknowledgedSubscriptions($topics));
-        $repository->addSubscription(new Subscription('rebung-pintar/v1/nodes/+/telemetry', 1));
+        $repository->addSubscription(new Subscription('hidroponik/v1/nodes/+/telemetry', 1));
         $this->assertFalse($repository->hasAcknowledgedSubscriptions($topics));
         $repository->addSubscription(new Subscription($topics[0], 1));
         $this->assertFalse($repository->hasAcknowledgedSubscriptions($topics));
@@ -158,7 +158,7 @@ class MqttCommandsTest extends TestCase
     public function test_factory_status_fails_closed_before_client_creation(): void
     {
         $factory = new MqttConnectionFactory;
-        $this->assertFalse($factory->hasAcknowledgedSubscriptions(['rebung-pintar/v1/nodes/1/telemetry']));
+        $this->assertFalse($factory->hasAcknowledgedSubscriptions(['hidroponik/v1/nodes/1/telemetry']));
         $this->assertFalse($factory->hasPendingSubscriptions());
     }
 
@@ -170,7 +170,7 @@ class MqttCommandsTest extends TestCase
             $callback = $handler;
         });
         $client->method('loop')->willReturnCallback(function () use (&$callback): void {
-            $callback('rebung-pintar/v1/nodes/1/telemetry', 'raw-secret-payload', true);
+            $callback('hidroponik/v1/nodes/1/telemetry', 'raw-secret-payload', true);
         });
         $client->expects($this->once())->method('interrupt');
         $client->expects($this->once())->method('disconnect');
@@ -200,7 +200,7 @@ class MqttCommandsTest extends TestCase
         });
         $client->method('loop')->willReturnCallback(function () use (&$callback): void {
             try {
-                $callback('rebung-pintar/v1/nodes/1/telemetry', '{}', false);
+                $callback('hidroponik/v1/nodes/1/telemetry', '{}', false);
             } catch (\Throwable) {
                 // The actual library catches subscriber callback exceptions too.
             }

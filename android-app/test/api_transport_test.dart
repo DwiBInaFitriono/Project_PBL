@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rebung_pintar/api_client.dart';
+import 'package:hidroponik_dft/api_client.dart';
 
 import 'api_client_test.dart' show loginResponse;
 import 'api_security_test.dart' show signIn;

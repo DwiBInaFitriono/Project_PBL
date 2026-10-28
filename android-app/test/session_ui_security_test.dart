@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:rebung_pintar/api_client.dart';
-import 'package:rebung_pintar/dashboard_page.dart';
-import 'package:rebung_pintar/main.dart';
+import 'package:hidroponik_dft/api_client.dart';
+import 'package:hidroponik_dft/dashboard_page.dart';
+import 'package:hidroponik_dft/main.dart';
 
 import 'api_client_test.dart' show loginResponse, testUser;
 import 'live_monitoring_test.dart' show snapshotFixture;
@@ -56,7 +56,7 @@ void main() {
       await _enter(tester, api);
       await tester.tap(find.byTooltip('Keluar'));
       await tester.pump();
-      expect(find.text('31.2', skipOffstage: false), findsNothing);
+      expect(find.text('0.0', skipOffstage: false), findsNothing);
       expect(find.byTooltip('Tentang status data'), findsNothing);
       await tester.pump(const Duration(seconds: 16));
       await tester.pumpAndSettle();
@@ -97,7 +97,7 @@ void main() {
       logout.complete(_json({}, 500));
       await tester.pumpAndSettle();
       expect(api.isAuthenticated, isTrue);
-      expect(find.text('31.2'), findsOneWidget);
+      expect(find.text('0.0'), findsOneWidget);
       expect(find.textContaining('Pencabutan token server'), findsNothing);
       expect(find.byType(DashboardPage), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -159,7 +159,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump();
       expect(api.isAuthenticated, isFalse);
-      expect(find.text('31.2', skipOffstage: false), findsNothing);
+      expect(find.text('0.0', skipOffstage: false), findsNothing);
       expect(
         find.text('private-profile@example.test', skipOffstage: false),
         findsNothing,
@@ -262,7 +262,7 @@ void main() {
       await _enter(tester, api);
       await tester.tap(find.byTooltip('Keluar'));
       await tester.pump();
-      expect(find.text('31.2', skipOffstage: false), findsNothing);
+      expect(find.text('0.0', skipOffstage: false), findsNothing);
       logout.complete(_json({}, 500));
       await tester.pumpAndSettle();
       const message =
@@ -277,7 +277,7 @@ void main() {
       await tester.tap(find.byKey(const Key('submit')));
       await tester.pumpAndSettle();
       expect(api.isAuthenticated, isTrue);
-      expect(find.text('31.2'), findsOneWidget);
+      expect(find.text('0.0'), findsOneWidget);
       expect(find.text(message), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
@@ -303,12 +303,12 @@ void main() {
       );
       addTearDown(api.dispose);
       await _enter(tester, api);
-      expect(find.text('31.2'), findsOneWidget);
+      expect(find.text('0.0'), findsOneWidget);
       await tester.tap(find.byTooltip('Keluar'));
       await tester.pump();
 
       expect(api.isAuthenticated, isFalse);
-      expect(find.text('31.2', skipOffstage: false), findsNothing);
+      expect(find.text('0.0', skipOffstage: false), findsNothing);
       expect(find.byTooltip('Tentang status data'), findsNothing);
       expect(find.byTooltip('Buka navigasi'), findsNothing);
       await tester.binding.handlePopRoute();
@@ -343,7 +343,7 @@ void main() {
       );
       addTearDown(api.dispose);
       await _enter(tester, api);
-      expect(find.text('31.2'), findsOneWidget);
+      expect(find.text('0.0'), findsOneWidget);
       await tester.tap(find.byTooltip('Tentang status data'));
       await tester.pumpAndSettle();
       expect(find.byType(AlertDialog), findsOneWidget);
@@ -354,7 +354,7 @@ void main() {
       expect(api.isAuthenticated, isFalse);
       expect(find.byType(AlertDialog, skipOffstage: false), findsNothing);
       expect(find.byType(DashboardPage, skipOffstage: false), findsNothing);
-      expect(find.text('31.2', skipOffstage: false), findsNothing);
+      expect(find.text('0.0', skipOffstage: false), findsNothing);
       expect(find.byKey(const Key('submit')), findsOneWidget);
       expect(
         find.text('Sesi berakhir. Silakan masuk kembali.'),

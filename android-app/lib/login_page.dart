@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
         await api.login(
           email: _email.text.trim(),
           password: _password.text,
-          deviceName: 'Rebung Pintar Flutter',
+          deviceName: 'Hidroponik DFT Flutter',
         );
         if (!mounted) {
           await api.logout();
@@ -125,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Flexible(child: RebungBrand()),
+                          const Flexible(child: HidroponikBrand()),
                           const SizedBox(width: 16),
                           IconButton.outlined(
                             constraints: const BoxConstraints.tightFor(
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               if (!compact) ...[
                                 Text(
-                                  'REBUNG PINTAR',
+                                  'HIDROPONIK DFT',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
@@ -313,30 +313,69 @@ class _LoginPageState extends State<LoginPage> {
                                         ],
                                       ),
                               ),
-                              const SizedBox(height: 12),
-                              if (widget.api == null &&
-                                  widget.configurationError == null)
-                                TextButton.icon(
-                                  onPressed: () => Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => DashboardPage(
-                                        onThemeChanged: widget.onThemeChanged,
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Divider(
+                                      color: colors.outline.withValues(alpha: .35),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                    ),
+                                    child: Text(
+                                      'atau',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: colors.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
-                                  icon: const Icon(
-                                    Icons.dashboard_outlined,
-                                    size: 18,
+                                  Expanded(
+                                    child: Divider(
+                                      color: colors.outline.withValues(alpha: .35),
+                                    ),
                                   ),
-                                  label: const Text(
-                                    'Lihat dashboard (pratinjau)',
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              OutlinedButton.icon(
+                                key: const Key('btn-preview-mode'),
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(double.infinity, 48),
+                                  side: BorderSide(
+                                    color: colors.outline.withValues(alpha: .5),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
                                   ),
                                 ),
-                              const SizedBox(height: 8),
+                                onPressed: () => Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => DashboardPage(
+                                      onThemeChanged: widget.onThemeChanged,
+                                    ),
+                                  ),
+                                ),
+                                icon: const Icon(
+                                  Icons.visibility_outlined,
+                                  size: 20,
+                                ),
+                                label: const Text(
+                                  'Lihat dashboard (pratinjau)',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
                               Text(
                                 widget.api == null
                                     ? 'Pratinjau · Belum terhubung ke server.'
-                                    : 'REST API v1',
+                                    : 'REST API v1 · Mode pratinjau tersedia',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 12,
@@ -349,7 +388,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       Text(
-                        'Rebung Pintar',
+                        'Hidroponik DFT',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 11,
@@ -368,23 +407,26 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-class RebungBrand extends StatelessWidget {
-  const RebungBrand({super.key});
+class HidroponikBrand extends StatelessWidget {
+  const HidroponikBrand({super.key});
 
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.onSurface;
     return Semantics(
-      label: 'Rebung Pintar',
+      label: 'Hidroponik DFT',
       excludeSemantics: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CustomPaint(size: const Size(36, 44), painter: _BambooPainter(color)),
+          CustomPaint(
+            size: const Size(40, 44),
+            painter: _HydroponicChannelPainter(color),
+          ),
           const SizedBox(width: 10),
           Flexible(
             child: Text(
-              'Rebung\nPintar.',
+              'Hidroponik\nDFT',
               style: TextStyle(
                 fontSize: 22,
                 height: 1.03,
@@ -400,44 +442,31 @@ class RebungBrand extends StatelessWidget {
   }
 }
 
-class _BambooPainter extends CustomPainter {
-  const _BambooPainter(this.color);
+class _HydroponicChannelPainter extends CustomPainter {
+  const _HydroponicChannelPainter(this.color);
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.save();
-    canvas.scale(size.width / 40, size.height / 44);
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.4
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
-    final outline = Path()
-      ..moveTo(20, 3)
-      ..cubicTo(12, 12, 7, 23, 7, 33)
-      ..cubicTo(7, 39, 13, 41, 20, 41)
-      ..cubicTo(27, 41, 33, 39, 33, 33)
-      ..cubicTo(33, 23, 28, 12, 20, 3)
-      ..close();
-    final stems = Path()
-      ..moveTo(20, 13)
-      ..lineTo(20, 40)
-      ..moveTo(10, 24)
-      ..lineTo(20, 30)
-      ..lineTo(30, 24)
-      ..moveTo(8, 33)
-      ..lineTo(20, 39)
-      ..lineTo(32, 33)
-      ..moveTo(15, 15)
-      ..lineTo(20, 19)
-      ..lineTo(25, 15);
-    canvas.drawPath(outline, paint);
-    canvas.drawPath(stems, paint);
-    canvas.restore();
+    final channel = RRect.fromRectAndRadius(
+      Rect.fromLTWH(3, 22, size.width - 6, 16),
+      const Radius.circular(5),
+    );
+    canvas.drawRRect(channel, paint);
+    canvas.drawLine(Offset(8, 30), Offset(size.width - 8, 30), paint);
+    for (final x in [10.0, 20.0, 30.0]) {
+      canvas.drawCircle(Offset(x, 15), 4, paint);
+      canvas.drawLine(Offset(x, 19), Offset(x, 22), paint);
+    }
   }
 
   @override
-  bool shouldRepaint(_BambooPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(_HydroponicChannelPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

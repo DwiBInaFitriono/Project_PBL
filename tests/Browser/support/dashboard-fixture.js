@@ -6,7 +6,7 @@ import { test as base, expect } from '@playwright/test';
 
 export const test = base.extend({
     renderResponse: [async ({}, use, workerInfo) => {
-        const directory = mkdtempSync(join(tmpdir(), 'rebung-dashboard-'));
+        const directory = mkdtempSync(join(tmpdir(), 'hidroponik-dashboard-'));
         const pages = new Map();
         try {
             await use((path = '/dashboard', role = 'operator') => {

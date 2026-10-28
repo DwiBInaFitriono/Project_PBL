@@ -1,195 +1,121 @@
 /*
- * ============================================================================
- * Rebung Pintar — Firmware Node 1 (Pembibitan / Zona A)
- * Mikrokontroler: ESP32 DevKit V1
- * Sensor:
- *   1. DHT22 (Suhu Udara & Kelembapan Udara) - Pin GPIO 4
- *   2. Capacitive Soil Moisture Sensor v1.2  - Pin GPIO 34 (ADC1_CH6)
- * Aktuator:
- *   1. Buzzer Aktif 5V (GPIO 18) & LED Indikator (GPIO 19)
- *   2. Modul Relay 5V Modular (GPIO 23) - Pompa Irigasi / Solenoid / Fan
- * Komunikasi: WiFi + MQTT Client (PubSubClient)
- * Topik Telemetri: rebung-pintar/v1/nodes/1/telemetry
- * Topik Aktuator : rebung-pintar/v1/nodes/1/actuators/set
- * ============================================================================
+ * Hidroponik DFT IoT: Node Nutrisi (ID 1).
+ * Template telemetry only. Select sensor drivers, pins, voltage conditioning,
+ * calibration, TLS CA, and credentials before deployment.
  */
+#include <WiFiClientSecure.h>
+#include <ArduinoJson.h>
+#define NODE_ID "1"
+#define MQTT_CLIENT_ID "hidroponik-node-nutrisi-1"
+#define TELEMETRY_TOPIC "hidroponik/v1/nodes/1/telemetry"
+const char* CA_CERTIFICATE_PLACEHOLDER = "-----BEGIN CERTIFICATE-----\nREPLACE_WITH_BROKER_CA\n-----END CERTIFICATE-----\n";
+
+// Implement after selecting calibrated hardware. Return false on any unavailable
+// required reading; never substitute fabricated numeric data.
+bool readSensors(JsonObject readings) {
+  // TODO: read calibrated pH probe, then readings["ph"] = value;
+  // TODO: read water-temperature probe, then readings["water_temperature"] = value;
+  // TODO: read water-level sensor, then readings["water_level"] = value;
+  return false;
+}
 
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <DHT.h>
 #include <ArduinoJson.h>
 #include <time.h>
 
-// --- Konfigurasi WiFi & MQTT Broker ---
-const char* WIFI_SSID       = "WIFI_SSID_ANDA";
-const char* WIFI_PASSWORD   = "WIFI_PASSWORD_ANDA";
-const char* MQTT_BROKER     = "192.168.1.100"; // Ganti dengan IP Node 3 / Domain Cloudflare
-const int   MQTT_PORT       = 1883;
-const char* MQTT_USER       = "node1";
-const char* MQTT_PASS       = "secret_token_node1";
-const char* CLIENT_ID       = "esp32-rebung-node-1";
+// Supply these at build/deployment time. Never commit real credentials.
+const char* WIFI_SSID = "WIFI_SSID_PLACEHOLDER";
+const char* WIFI_PASSWORD = "WIFI_PASSWORD_PLACEHOLDER";
+const char* MQTT_HOST = "MQTT_HOST_PLACEHOLDER";
+const uint16_t MQTT_PORT = 8883;
+const char* MQTT_USERNAME = "MQTT_USERNAME_PLACEHOLDER";
+const char* MQTT_PASSWORD = "MQTT_PASSWORD_PLACEHOLDER";
 
-// --- Pinout Hardware ---
-#define DHTPIN        4
-#define DHTTYPE       DHT22
-#define SOIL_PIN      34  // ADC1 Analog input
-#define BUZZER_PIN    18  // Aktuator 1: Buzzer
-#define LED_PIN       19  // Aktuator 1: LED Alarm/Status
-#define RELAY_PIN     23  // Aktuator 2: Relay Modular (Active LOW)
+const unsigned long TELEMETRY_INTERVAL_MS = 60000;
+unsigned long lastTelemetryAt = 0;
+WiFiClientSecure transport;
+PubSubClient mqttClient(transport);
 
-// --- Kalibrasi Sensor Kelembapan Tanah Analog ---
-// Nilai ADC ESP32: 0 (3.3V / Sangat Basah) hingga 4095 (0V / Sangat Kering di Udara)
-const int SOIL_AIR_VALUE   = 3200; // Pembacaan saat sensor di udara kering
-const int SOIL_WATER_VALUE = 1400; // Pembacaan saat sensor dicelupkan ke air
+bool readSensors(JsonObject readings);
 
-// --- Interval & Pewaktu ---
-const unsigned long TELEMETRY_INTERVAL_MS = 15000; // Publish setiap 15 detik
-unsigned long lastTelemetryTime = 0;
-
-DHT dht(DHTPIN, DHTTYPE);
-WiFiClient espClient;
-PubSubClient mqttClient(espClient);
-
-// Fungsi sinkronisasi jam NTP untuk timestamp RFC3339 yang valid
-void setupNTP() {
-  configTime(7 * 3600, 0, "pool.ntp.org", "time.google.com"); // WIB (UTC+7)
+String isoTimestamp() {
+  struct tm timeInfo;
+  if (!getLocalTime(&timeInfo)) {
+    return String();
+  }
+  char value[26];
+  strftime(value, sizeof(value), "%Y-%m-%dT%H:%M:%SZ", &timeInfo);
+  return String(value);
 }
 
-String getIsoTimestamp() {
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
-    return "2026-09-17T07:00:00+07:00"; // Fallback format RFC3339
-  }
-  char buffer[35];
-  strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%S+07:00", &timeinfo);
-  return String(buffer);
+String messageId() {
+  char value[37];
+  snprintf(value, sizeof(value), "%08lx-%04x-4%03x-%04x-%08lx%04x",
+    (unsigned long)esp_random(), (uint16_t)esp_random(),
+    (uint16_t)(esp_random() & 0x0fff),
+    (uint16_t)(0x8000 | (esp_random() & 0x3fff)),
+    (unsigned long)esp_random(), (uint16_t)esp_random());
+  return String(value);
 }
 
-// Menghasilkan UUID v4 acak sederhana untuk message_id telemetri
-String generateUUID() {
-  uint32_t r1 = esp_random();
-  uint32_t r2 = esp_random();
-  char uuidStr[37];
-  snprintf(uuidStr, sizeof(uuidStr), "%08x-%04x-4%03x-%04x-%08x%04x",
-           r1,
-           (uint16_t)(r2 >> 16),
-           (uint16_t)(r2 & 0x0FFF),
-           (uint16_t)(0x8000 | ((r1 >> 16) & 0x3FFF)),
-           r2,
-           (uint16_t)r1);
-  return String(uuidStr);
-}
-
-void callback(char* topic, byte* payload, unsigned int length) {
-  String message;
-  for (unsigned int i = 0; i < length; i++) {
-    message += (char)payload[i];
-  }
-
-  // Parse JSON perintah kontrol aktuator dari MQTT
-  StaticJsonDocument<256> doc;
-  DeserializationError err = deserializeJson(doc, message);
-  if (err) return;
-
-  // Kontrol Aktuator 1: Buzzer / LED
-  if (doc.containsKey("alarm")) {
-    bool alarmState = doc["alarm"];
-    digitalWrite(BUZZER_PIN, alarmState ? HIGH : LOW);
-    digitalWrite(LED_PIN, alarmState ? HIGH : LOW);
-  }
-
-  // Kontrol Aktuator 2: Relay Modular (Active LOW: LOW = Hidup, HIGH = Mati)
-  if (doc.containsKey("relay")) {
-    bool relayState = doc["relay"];
-    digitalWrite(RELAY_PIN, relayState ? LOW : HIGH);
+void connectWifi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
   }
 }
 
-void reconnectMqtt() {
+void connectMqtt() {
   while (!mqttClient.connected()) {
-    if (mqttClient.connect(CLIENT_ID, MQTT_USER, MQTT_PASS)) {
-      mqttClient.subscribe("rebung-pintar/v1/nodes/1/actuators/set");
-    } else {
+    mqttClient.connect(MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD);
+    if (!mqttClient.connected()) {
       delay(3000);
     }
   }
 }
 
+void publishTelemetry() {
+  String timestamp = isoTimestamp();
+  if (timestamp.isEmpty()) {
+    return; // Do not invent a timestamp when NTP is unavailable.
+  }
+
+  StaticJsonDocument<512> payload;
+  payload["schema_version"] = 1;
+  payload["message_id"] = messageId();
+  payload["node_id"] = NODE_ID;
+  payload["recorded_at"] = timestamp;
+  JsonObject readings = payload.createNestedObject("readings");
+  if (!readSensors(readings) || readings.size() == 0) {
+    return; // Do not publish fallback readings.
+  }
+
+  char encoded[512];
+  size_t size = serializeJson(payload, encoded, sizeof(encoded));
+  if (size == 0 || size >= sizeof(encoded)) {
+    return;
+  }
+  mqttClient.publish(TELEMETRY_TOPIC, encoded, false);
+}
+
 void setup() {
   Serial.begin(115200);
-  pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(RELAY_PIN, OUTPUT);
-
-  // Inisialisasi awal kondisi mati
-  digitalWrite(BUZZER_PIN, LOW);
-  digitalWrite(LED_PIN, LOW);
-  digitalWrite(RELAY_PIN, HIGH); // Relay off (active-low)
-
-  dht.begin();
-
-  // Koneksi WiFi
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    digitalWrite(LED_PIN, !digitalRead(LED_PIN)); // Blink tanda koneksi
-  }
-  digitalWrite(LED_PIN, LOW);
-
-  setupNTP();
-  mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
-  mqttClient.setCallback(callback);
+  connectWifi();
+  configTime(0, 0, "pool.ntp.org", "time.google.com");
+  transport.setCACert(CA_CERTIFICATE_PLACEHOLDER); // Replace with broker CA.
+  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+  // Initialize actual sensor drivers and pins after hardware selection.
 }
 
 void loop() {
   if (!mqttClient.connected()) {
-    reconnectMqtt();
+    connectMqtt();
   }
   mqttClient.loop();
-
-  unsigned long currentMillis = millis();
-  if (currentMillis - lastTelemetryTime >= TELEMETRY_INTERVAL_MS) {
-    lastTelemetryTime = currentMillis;
-
-    // 1. Baca Sensor 1 & 2: Suhu dan Kelembapan Udara (DHT22)
-    float temp = dht.readTemperature();
-    float hum = dht.readHumidity();
-
-    // 2. Baca Sensor 3: Kelembapan Tanah (Capacitive)
-    int soilRaw = analogRead(SOIL_PIN);
-    float soilPercent = map(soilRaw, SOIL_AIR_VALUE, SOIL_WATER_VALUE, 0, 100);
-    soilPercent = constrain(soilPercent, 0.0, 100.0);
-
-    // Validasi pembacaan
-    if (isnan(temp) || isnan(hum)) {
-      temp = 27.0; // Fallback jika sensor DHT sedang inisialisasi
-      hum = 65.0;
-    }
-
-    // Bentuk Payload Telemetri sesuai kontrak docs/mqtt.md
-    StaticJsonDocument<512> doc;
-    doc["schema_version"] = 1;
-    doc["message_id"]     = generateUUID();
-    doc["node_id"]        = "1";
-    doc["recorded_at"]    = getIsoTimestamp();
-
-    JsonObject readings = doc.createNestedObject("readings");
-    readings["temperature"]   = serialized(String(temp, 1));
-    readings["air_humidity"]  = serialized(String(hum, 1));
-    readings["soil_moisture"] = serialized(String(soilPercent, 1));
-
-    char jsonBuffer[512];
-    serializeJson(doc, jsonBuffer);
-
-    // Publish telemetri ke broker dengan QoS 1 dan retain=false
-    mqttClient.publish("rebung-pintar/v1/nodes/1/telemetry", jsonBuffer, false);
-
-    // Otomasi lokal sederhana: jika kelembapan tanah < 30%, nyalakan LED peringatan
-    if (soilPercent < 30.0) {
-      digitalWrite(LED_PIN, HIGH);
-    } else {
-      digitalWrite(LED_PIN, LOW);
-    }
+  if (millis() - lastTelemetryAt >= TELEMETRY_INTERVAL_MS) {
+    lastTelemetryAt = millis();
+    publishTelemetry();
   }
 }

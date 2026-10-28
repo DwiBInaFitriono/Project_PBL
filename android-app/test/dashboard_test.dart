@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rebung_pintar/main.dart';
+import 'package:hidroponik_dft/main.dart';
 
 Future<void> openPreview(WidgetTester tester) async {
   await tester.pumpWidget(const MainApp());
@@ -106,17 +106,17 @@ void main() {
     (tester) async {
       await openPreview(tester);
       await tester.ensureVisible(
-        find.byKey(const Key('chart-sensor-soil_moisture')),
+        find.byKey(const Key('chart-sensor-water_level')),
       );
-      await tester.tap(find.byKey(const Key('chart-sensor-soil_moisture')));
+      await tester.tap(find.byKey(const Key('chart-sensor-water_level')));
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.byKey(const Key('chart-hours-6')));
       await tester.tap(find.byKey(const Key('chart-hours-6')));
       await tester.pumpAndSettle();
-      expect(find.text('Kelembapan tanah · %'), findsOneWidget);
+      expect(find.text('Ketinggian air · cm'), findsOneWidget);
       expect(find.text('6 jam terakhir · WIB'), findsOneWidget);
-      expect(find.text('Min'), findsNWidgets(2));
-      expect(find.text('Rata-rata'), findsNWidgets(2));
+      expect(find.text('Min'), findsOneWidget);
+      expect(find.text('Rata-rata'), findsOneWidget);
     },
   );
 
@@ -128,8 +128,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('menu-node-2')));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byKey(const Key('nav-node-2-temperature')));
-    await tester.tap(find.byKey(const Key('nav-node-2-temperature')));
+    await tester.ensureVisible(
+      find.byKey(const Key('nav-node-2-air_temperature')),
+    );
+    await tester.tap(find.byKey(const Key('nav-node-2-air_temperature')));
     await tester.pumpAndSettle();
     expect(find.text('Monitoring Node 2'), findsOneWidget);
     expect(find.byKey(const Key('node-card-1')), findsNothing);
@@ -148,8 +150,8 @@ void main() {
     expect(find.textContaining('PRATINJAU'), findsWidgets);
     expect(find.byKey(const Key('node-card-1')), findsOneWidget);
     expect(find.byKey(const Key('node-card-2')), findsOneWidget);
-    expect(find.byKey(const Key('sensor-1-temperature')), findsOneWidget);
-    expect(find.byKey(const Key('sensor-2-soil_moisture')), findsOneWidget);
+    expect(find.byKey(const Key('sensor-1-ph')), findsOneWidget);
+    expect(find.byKey(const Key('sensor-2-water_flow')), findsOneWidget);
     expect(find.text('Tren sensor'), findsOneWidget);
     expect(find.text('Belum ada data'), findsOneWidget);
     expect(find.text('Belum ada riwayat'), findsOneWidget);

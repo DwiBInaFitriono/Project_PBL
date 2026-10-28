@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'app_palette.dart';
 import 'dashboard_widgets.dart';
 import 'chart_panel.dart';
-import 'gauge_widget.dart';
-import 'model_3d_view.dart';
-
 
 class MonitoringPage extends StatelessWidget {
   const MonitoringPage({
@@ -44,16 +41,20 @@ class MonitoringPage extends StatelessWidget {
                 int.parse(data['id'] as String),
           ];
     final sensorCount = snapshot == null
-        ? nodes.length * sensors.length
+        ? nodes.fold<int>(0, (count, id) => count + sensorsForNode(id).length)
         : nodes.fold<int>(
             0,
             (count, id) =>
                 count +
                 (monitoringNode(snapshot, id)!['sensors'] as List).length,
           );
+    final chartNodes = [
+      for (final id in nodes)
+        if (sensorsForNode(id).any((sensor) => sensor.id == sensorId)) id,
+    ];
     final readings = monitoringPoints(
       snapshot,
-      nodes: nodes,
+      nodes: chartNodes,
       sensorId: sensorId,
       hours: hours,
     );
@@ -156,69 +157,6 @@ class MonitoringPage extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 24),
-        Builder(
-          builder: (context) {
-            final activeNodeId = node ?? 1;
-            final nodeData = monitoringNode(snapshot, activeNodeId);
-            final sTemp = monitoringSensor(nodeData, 'temperature');
-            final sAir = monitoringSensor(nodeData, 'air_humidity');
-            final sSoil = monitoringSensor(nodeData, 'soil_moisture');
-            final tempVal = sTemp != null && sTemp['value'] != null ? (sTemp['value'] as num).toDouble() : null;
-            final airVal = sAir != null && sAir['value'] != null ? (sAir['value'] as num).toDouble() : null;
-            final soilVal = sSoil != null && sSoil['value'] != null ? (sSoil['value'] as num).toDouble() : null;
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SectionTitle(
-                  'Gauge Indikator (Node $activeNodeId)',
-                  'Visualisasi dial parameter sensor',
-                ),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  alignment: WrapAlignment.spaceEvenly,
-                  children: [
-                    RadialGaugeWidget(
-                      title: 'Suhu Udara',
-                      value: tempVal,
-                      unit: '°C',
-                      minValue: 0,
-                      maxValue: 50,
-                      optimalMin: 22,
-                      optimalMax: 30,
-                    ),
-                    RadialGaugeWidget(
-                      title: 'Kelembapan Udara',
-                      value: airVal,
-                      unit: '% RH',
-                      minValue: 0,
-                      maxValue: 100,
-                      optimalMin: 60,
-                      optimalMax: 85,
-                    ),
-                    RadialGaugeWidget(
-                      title: 'Kelembapan Tanah',
-                      value: soilVal,
-                      unit: '%',
-                      minValue: 0,
-                      maxValue: 100,
-                      optimalMin: 45,
-                      optimalMax: 75,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Bamboo3DViewer(
-                  soilMoisturePercent: soilVal ?? 60.0,
-                  temperatureC: tempVal ?? 27.0,
-                  nodeName: 'Node $activeNodeId',
-                ),
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: 24),
         SectionTitle(node == null ? 'Tren sensor' : 'Tren Node $node', ''),
 
         ChartPanel(
@@ -226,7 +164,7 @@ class MonitoringPage extends StatelessWidget {
           connected: connected,
           loading: loading,
           error: error,
-          nodes: nodes,
+          nodes: chartNodes,
           sensorId: sensorId,
           hours: hours,
           onSensorChanged: onSensorChanged,

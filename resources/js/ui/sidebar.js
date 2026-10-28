@@ -9,7 +9,7 @@ export function initSidebar() {
     const workspace = document.querySelector('[data-workspace]');
     const mobile = window.matchMedia('(max-width: 1024px)');
     const collapseControl = document.querySelector('[data-sidebar-collapse]');
-    const storageKey = 'rebung-pintar-sidebar-collapsed';
+    const storageKey = 'hidroponik-dft-sidebar-collapsed';
     let drawerOpen = false;
     let collapsed = false;
     try { collapsed = localStorage.getItem(storageKey) === 'true'; } catch { /* Storage is optional. */ }

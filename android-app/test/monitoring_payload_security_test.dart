@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:rebung_pintar/api_client.dart';
-import 'package:rebung_pintar/main.dart';
+import 'package:hidroponik_dft/api_client.dart';
+import 'package:hidroponik_dft/main.dart';
 
 import 'api_client_test.dart' show loginResponse;
 import 'live_monitoring_test.dart' show snapshotFixture;
@@ -141,12 +141,12 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Respons server tidak valid.'), findsOneWidget);
       expect(find.text('Gagal memuat data'), findsOneWidget);
-      expect(find.text('31.2'), findsNothing);
+      expect(find.text('0.0'), findsNothing);
       expect(api.isAuthenticated, isTrue);
       valid = true;
       await tester.tap(find.byTooltip('Muat ulang'));
       await tester.pumpAndSettle();
-      expect(find.text('31.2'), findsOneWidget);
+      expect(find.text('0.0'), findsOneWidget);
       expect(find.text('Respons server tidak valid.'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

@@ -80,7 +80,10 @@ class ChartPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sensor = sensors.firstWhere((s) => s.id == sensorId);
+    final sensor = sensors.firstWhere(
+      (sensor) => sensor.id == sensorId,
+      orElse: () => sensors.first,
+    );
     final definition = monitoringSensor(snapshot, sensorId);
     final sensorName = definition?['name'] as String? ?? sensor.name;
     final sensorUnit = definition?['unit'] as String? ?? sensor.unit;
@@ -103,7 +106,9 @@ class ChartPanel extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final item in sensors)
+              for (final item in sensorsForNode(
+                nodes.length == 1 ? nodes.first : 1,
+              ))
                 Tooltip(
                   message: item.name,
                   child: ChoiceChip(
@@ -116,9 +121,13 @@ class ChartPanel extends StatelessWidget {
                           : Theme.of(context).colorScheme.onSurface,
                     ),
                     label: Text(switch (item.id) {
-                      'temperature' => 'Suhu',
-                      'air_humidity' => 'Udara',
-                      _ => 'Tanah',
+                      'ph' => 'pH',
+                      'water_temperature' => 'Suhu air',
+                      'water_level' => 'Level air',
+                      'air_temperature' => 'Suhu udara',
+                      'air_humidity' => 'Kelembapan',
+                      'light_intensity' => 'Cahaya',
+                      _ => 'Aliran',
                     }),
                     selected: sensorId == item.id,
                     showCheckmark: false,

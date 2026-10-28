@@ -36,7 +36,7 @@ class HistoryTimezoneTest extends TestCase
 
         $this->travelTo(Carbon::parse('2026-09-16 17:00:00', 'UTC'));
         foreach (['2026-09-10 16:59:59', '2026-09-10 17:00:00', '2026-09-16 17:00:00', '2026-09-16 17:00:01'] as $timestamp) {
-            SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => $timestamp]);
+            SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => $timestamp]);
         }
         $response = $this->get('/history')->assertOk();
         $this->assertSame([3, 2], $response->viewData('readings')->pluck('id')->all());
@@ -71,10 +71,10 @@ class HistoryTimezoneTest extends TestCase
     public function test_filter_links_and_pagination_retain_timezone(): void
     {
         $this->travelTo(Carbon::parse('2026-09-17 12:00:00', 'UTC'));
-        SensorReading::factory()->count(26)->create(['node_id' => '2', 'sensor_id' => 'temperature', 'recorded_at' => '2026-09-16 17:00:00']);
+        SensorReading::factory()->count(26)->create(['node_id' => '2', 'sensor_id' => 'ph', 'recorded_at' => '2026-09-16 17:00:00']);
 
         foreach (['Asia/Jakarta', 'UTC'] as $timezone) {
-            $filters = ['node' => '2', 'sensor' => 'temperature', 'from' => '2026-09-16', 'to' => '2026-09-17', 'timezone' => $timezone];
+            $filters = ['node' => '2', 'sensor' => 'ph', 'from' => '2026-09-16', 'to' => '2026-09-17', 'timezone' => $timezone];
             $response = $this->get('/history?'.http_build_query($filters))->assertOk();
             $this->assertSame($filters, $response->viewData('filters'));
             parse_str(parse_url($response->viewData('readings')->nextPageUrl(), PHP_URL_QUERY), $nextQuery);
@@ -91,14 +91,14 @@ class HistoryTimezoneTest extends TestCase
     public function test_print_report_exports_all_matches_in_the_selected_timezone_without_changing_storage(): void
     {
         $this->travelTo(Carbon::parse('2026-09-17 12:00:00', 'UTC'));
-        SensorReading::factory()->count(26)->create(['node_id' => '2', 'sensor_id' => 'temperature', 'value' => 0, 'recorded_at' => '2026-09-16 17:00:00']);
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => '2026-09-16 17:00:00']);
+        SensorReading::factory()->count(26)->create(['node_id' => '2', 'sensor_id' => 'ph', 'value' => 0, 'recorded_at' => '2026-09-16 17:00:00']);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => '2026-09-16 17:00:00']);
         SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'air_humidity', 'recorded_at' => '2026-09-16 17:00:00']);
         $stored = DB::table('sensor_readings')->orderBy('id')->get()->all();
 
         foreach (['Asia/Jakarta' => ['WIB', '2026-09-17', '2026-09-17 00:00:00'], 'UTC' => ['UTC', '2026-09-16', '2026-09-16 17:00:00']] as $timezone => [$label, $date, $display]) {
             $response = $this->get('/history/export?'.http_build_query([
-                'node' => '2', 'sensor' => 'temperature', 'from' => $date, 'to' => $date, 'timezone' => $timezone, 'page' => 2,
+                'node' => '2', 'sensor' => 'ph', 'from' => $date, 'to' => $date, 'timezone' => $timezone, 'page' => 2,
             ]))->assertOk()->assertViewIs('history.export')
                 ->assertSeeText('Waktu ('.$label.')')->assertSeeText('Total: 26 pembacaan');
             $content = $response->getContent();
@@ -116,7 +116,7 @@ class HistoryTimezoneTest extends TestCase
     public function test_html_displays_selected_timezone_without_mutating_stored_timestamps(): void
     {
         $this->travelTo(Carbon::parse('2026-09-17 12:00:00', 'UTC'));
-        $reading = SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => '2026-09-16 17:00:00']);
+        $reading = SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => '2026-09-16 17:00:00']);
         $stored = DB::table('sensor_readings')->where('id', $reading->id)->first();
 
         foreach (['Asia/Jakarta' => ['WIB', '2026-09-17 00:00:00'], 'UTC' => ['UTC', '2026-09-16 17:00:00']] as $timezone => [$label, $display]) {
@@ -147,7 +147,7 @@ class HistoryTimezoneTest extends TestCase
     {
         $this->travelTo(Carbon::parse('2026-09-16 12:00:00', 'UTC'));
         foreach (['2026-09-09 16:59:59', '2026-09-09 17:00:00', '2026-09-10 16:59:59', '2026-09-10 17:00:00', '2026-09-10 23:59:59', '2026-09-11 00:00:00'] as $timestamp) {
-            SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => $timestamp]);
+            SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => $timestamp]);
         }
 
         foreach (['UTC' => [5, 4, 3], 'Asia/Jakarta' => [3, 2]] as $timezone => $expected) {
@@ -161,7 +161,7 @@ class HistoryTimezoneTest extends TestCase
     {
         $this->travelTo(Carbon::parse('2026-09-16 12:00:00', 'UTC'));
         foreach (['2026-09-09 16:59:59', '2026-09-09 17:00:00', '2026-09-10 16:59:59', '2026-09-10 17:00:00'] as $timestamp) {
-            SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => $timestamp]);
+            SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => $timestamp]);
         }
 
         $response = $this->get('/history?from=2026-09-10&to=2026-09-10')->assertOk();

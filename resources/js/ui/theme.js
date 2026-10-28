@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'rebung-pintar-theme';
+const STORAGE_KEY = 'hidroponik-dft-theme';
 
 export function initTheme() {
     const button = document.querySelector('[data-theme-toggle]');

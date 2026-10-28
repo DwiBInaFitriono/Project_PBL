@@ -10,23 +10,28 @@ class DashboardTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_each_node_has_three_proposed_sensor_parameters_with_no_real_values(): void
+    public function test_each_node_has_its_configured_hydroponic_sensor_parameters_with_no_real_values(): void
     {
         $this->withoutVite();
 
         $response = $this->actingAs(User::factory()->create())->get('/dashboard');
 
         $response->assertOk()
+            ->assertSeeText('pH nutrisi')
+            ->assertDontSeeText('TDS nutrisi')
+            ->assertSeeText('Suhu air')
+            ->assertSeeText('Level tandon')
             ->assertSeeText('Suhu udara')
             ->assertSeeText('Kelembapan udara')
-            ->assertSeeText('Kelembapan tanah')
+            ->assertSeeText('Intensitas cahaya')
+            ->assertSeeText('Debit air')
             ->assertSeeText('Parameter usulan')
             ->assertViewHas('nodes', function (array $nodes): bool {
-                foreach ($nodes as $node) {
-                    if (count($node['sensors'] ?? []) !== 3) {
-                        return false;
-                    }
+                if (count($nodes[0]['sensors'] ?? []) !== 3 || count($nodes[1]['sensors'] ?? []) !== 4) {
+                    return false;
+                }
 
+                foreach ($nodes as $node) {
                     foreach ($node['sensors'] as $sensor) {
                         if ($sensor['value'] !== null || $sensor['readings'] !== []) {
                             return false;
@@ -57,8 +62,8 @@ class DashboardTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/dashboard')
             ->assertOk()
             ->assertSeeText('Ringkasan monitoring')
-            ->assertSeeText('Node 1')
-            ->assertSeeText('Node 2')
+            ->assertSeeText('Node Nutrisi')
+            ->assertSeeText('Node Iklim')
             ->assertSeeText('Menunggu integrasi')
             ->assertSeeText('Belum ada pembacaan')
             ->assertSeeText('Riwayat pembacaan')

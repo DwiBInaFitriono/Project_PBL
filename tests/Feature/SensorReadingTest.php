@@ -51,13 +51,13 @@ class SensorReadingTest extends TestCase
 
         $reading = SensorReading::factory()->create([
             'node_id' => '2',
-            'sensor_id' => 'temperature',
+            'sensor_id' => 'ph',
             'value' => 0,
             'recorded_at' => '2026-09-16 05:00:00',
         ])->fresh();
 
         $this->assertSame('2', $reading->node_id);
-        $this->assertSame('temperature', $reading->sensor_id);
+        $this->assertSame('ph', $reading->sensor_id);
         $this->assertSame(0.0, $reading->value);
         $this->assertSame('2026-09-16T05:00:00+00:00', $reading->recorded_at->toIso8601String());
         $this->assertNotNull($reading->created_at);

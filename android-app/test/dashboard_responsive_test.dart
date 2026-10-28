@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rebung_pintar/main.dart';
+import 'package:hidroponik_dft/main.dart';
 
 void main() {
   for (final size in [
@@ -44,10 +44,7 @@ void main() {
           expect(tester.takeException(), isNull);
           await tester.tap(find.byKey(const Key('menu-node-1')));
           await tester.pumpAndSettle();
-          expect(
-            find.byKey(const Key('nav-node-1-temperature')),
-            findsOneWidget,
-          );
+          expect(find.byKey(const Key('nav-node-1-ph')), findsOneWidget);
         }
       });
     }

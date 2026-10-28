@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:rebung_pintar/api_client.dart';
+import 'package:hidroponik_dft/api_client.dart';
 
 import 'api_client_test.dart' show loginResponse;
 

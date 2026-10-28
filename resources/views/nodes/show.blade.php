@@ -2,9 +2,9 @@
     <div data-monitoring-root data-monitoring-url="{{ route('monitoring.data', ['node' => $node['id']]) }}" data-node="{{ $node['id'] }}" data-monitoring="{{ json_encode($monitoring) }}" class="node-detail-page">
         <div class="dashboard-heading">
             <div>
-                <div class="eyebrow"><span></span> REBUNG PINTAR / {{ strtoupper($node['name']) }}</div>
+                <div class="eyebrow"><span></span> HIDROPONIK DFT / {{ strtoupper($node['name']) }}</div>
                 <h1>Monitoring {{ $node['name'] }}</h1>
-                <p class="form-intro">Tiga parameter sensor untuk memantau rebung bambu di {{ $node['name'] }}.</p>
+                <p class="form-intro">Empat parameter untuk memantau {{ $node['name'] }} pada sistem DFT horizontal.</p>
             </div>
             <a class="dashboard-refresh dashboard-refresh-icon" href="{{ route('nodes.show', $node['id']) }}" aria-label="Muat ulang" title="Muat ulang">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.2 6.2A8 8 0 0 1 20 12M4 12a8 8 0 0 0 13.8 5.8"/></svg>

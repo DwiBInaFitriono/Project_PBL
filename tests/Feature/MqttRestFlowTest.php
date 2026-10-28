@@ -23,11 +23,11 @@ class MqttRestFlowTest extends TestCase
         $payload = json_encode([
             'schema_version' => 1, 'message_id' => '2dcd02f8-3366-4814-b631-2a48d05d64a3', 'node_id' => '2',
             'recorded_at' => '2026-09-16T07:29:00+07:00',
-            'readings' => ['temperature' => 0, 'air_humidity' => 73.5],
+            'readings' => ['air_temperature' => 0, 'air_humidity' => 73.5],
         ], JSON_THROW_ON_ERROR);
         $ingestor = app(TelemetryIngestor::class);
-        $this->assertSame('accepted', $ingestor->ingest('rebung-pintar/v1/nodes/2/telemetry', $payload));
-        $this->assertSame('duplicate', $ingestor->ingest('rebung-pintar/v1/nodes/2/telemetry', $payload));
+        $this->assertSame('accepted', $ingestor->ingest('hidroponik/v1/nodes/2/telemetry', $payload));
+        $this->assertSame('duplicate', $ingestor->ingest('hidroponik/v1/nodes/2/telemetry', $payload));
         $this->assertDatabaseCount('sensor_readings', 2);
         $this->withToken($token)->getJson('/api/v1/monitoring?node=2')->assertOk()
             ->assertJsonCount(1, 'data.nodes')

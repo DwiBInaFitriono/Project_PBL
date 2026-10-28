@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rebung_pintar/api_client.dart';
+import 'package:hidroponik_dft/api_client.dart';
 
 void main() {
   test(

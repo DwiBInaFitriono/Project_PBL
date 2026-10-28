@@ -26,15 +26,15 @@ class MqttIngestionTest extends TestCase
         $this->travelTo(Carbon::parse('2026-09-16 00:00:00', 'UTC'));
     }
 
-    public function test_valid_telemetry_is_persisted_and_visible_in_monitoring(): void
+    public function test_valid_hydroponic_telemetry_is_persisted_and_visible_in_monitoring(): void
     {
         $result = app(TelemetryIngestor::class)->ingest($this->topic(), $this->payload());
 
         $this->assertSame('accepted', $result);
         $this->assertDatabaseCount('mqtt_messages', 1);
         $this->assertDatabaseCount('sensor_readings', 3);
-        $this->assertSame(27.5, SensorReading::where('sensor_id', 'temperature')->firstOrFail()->value);
-        $this->assertSame(27.5, app(MonitoringSnapshot::class)->forNode('1')['nodes'][0]['sensors'][0]['value']);
+        $this->assertSame(6.2, SensorReading::where('sensor_id', 'ph')->firstOrFail()->value);
+        $this->assertSame(6.2, app(MonitoringSnapshot::class)->forNode('1')['nodes'][0]['sensors'][0]['value']);
     }
 
     public function test_repeated_message_is_a_no_write_duplicate_scoped_to_node(): void
@@ -68,13 +68,13 @@ class MqttIngestionTest extends TestCase
     /** @return array<string, array{string, string, bool}> */
     public static function invalidEnvelopes(): array
     {
-        $topic = 'rebung-pintar/v1/nodes/1/telemetry';
+        $topic = 'hidroponik/v1/nodes/1/telemetry';
         $valid = [
             'schema_version' => 1,
             'message_id' => '5ef03860-30ae-44b2-a946-2ec66b397510',
             'node_id' => '1',
             'recorded_at' => '2026-09-16T00:00:00Z',
-            'readings' => ['temperature' => 27.5, 'air_humidity' => 70],
+            'readings' => ['ph' => 6.2, 'water_temperature' => 24.5, 'water_level' => 75],
         ];
         $json = json_encode($valid, JSON_THROW_ON_ERROR);
         $cases = [
@@ -84,11 +84,11 @@ class MqttIngestionTest extends TestCase
             'null' => [$topic, 'null', false],
             'oversized' => [$topic, $json.str_repeat(' ', 8192), false],
             'retained' => [$topic, $json, true],
-            'topic mismatch' => ['rebung-pintar/v1/nodes/2/telemetry', $json, false],
+            'topic mismatch' => ['hidroponik/v1/nodes/2/telemetry', $json, false],
             'topic suffix' => [$topic.'/extra', $json, false],
             'topic prefix' => ['other/'.$topic, $json, false],
-            'nonfinite number' => [$topic, str_replace('27.5', '1e9999', $json), false],
-            'NaN token' => [$topic, str_replace('27.5', 'NaN', $json), false],
+            'nonfinite number' => [$topic, str_replace('6.2', '1e9999', $json), false],
+            'NaN token' => [$topic, str_replace('6.2', 'NaN', $json), false],
         ];
         foreach ([
             'version' => ['schema_version' => 2],
@@ -97,13 +97,13 @@ class MqttIngestionTest extends TestCase
             'integer node' => ['node_id' => 1],
             'uuid' => ['message_id' => 'invalid'],
             'blank uuid' => ['message_id' => ''],
-            'unknown sensor' => ['readings' => ['temperature' => 27, 'unknown' => 3]],
+            'unknown sensor' => ['readings' => ['ph' => 6.2, 'unknown' => 3]],
             'empty readings' => ['readings' => (object) []],
             'list readings' => ['readings' => [1, 2]],
-            'null reading' => ['readings' => ['temperature' => 27, 'air_humidity' => null]],
-            'string reading' => ['readings' => ['temperature' => '27.5']],
-            'bool reading' => ['readings' => ['temperature' => true]],
-            'object reading' => ['readings' => ['temperature' => (object) ['value' => 27]]],
+            'null reading' => ['readings' => ['ph' => 6.2, 'water_temperature' => null]],
+            'string reading' => ['readings' => ['ph' => '6.2']],
+            'bool reading' => ['readings' => ['ph' => true]],
+            'object reading' => ['readings' => ['ph' => (object) ['value' => 6.2]]],
             'unknown field' => ['password' => 'payload-secret'],
         ] as $name => $overrides) {
             $cases[$name] = [$topic, json_encode(array_replace($valid, $overrides), JSON_THROW_ON_ERROR), false];
@@ -152,7 +152,7 @@ class MqttIngestionTest extends TestCase
     {
         app(TelemetryIngestor::class)->ingest($this->topic(), $this->payload([
             'recorded_at' => '2026-09-16T00:30:00.123456+07:00',
-            'readings' => ['temperature' => 0],
+            'readings' => ['ph' => 0],
         ]));
         $reading = SensorReading::firstOrFail();
         $this->assertSame('2026-09-15T17:30:00+00:00', $reading->recorded_at->toIso8601String());
@@ -166,7 +166,7 @@ class MqttIngestionTest extends TestCase
 
     public function test_storage_failure_rolls_back_message_and_all_sensor_rows(): void
     {
-        DB::unprepared("CREATE TRIGGER mqtt_test_fail BEFORE INSERT ON sensor_readings WHEN NEW.sensor_id = 'air_humidity' BEGIN SELECT RAISE(ABORT, 'test storage failure'); END");
+        DB::unprepared("CREATE TRIGGER mqtt_test_fail BEFORE INSERT ON sensor_readings WHEN NEW.sensor_id = 'water_temperature' BEGIN SELECT RAISE(ABORT, 'test storage failure'); END");
         try {
             app(TelemetryIngestor::class)->ingest($this->topic(), $this->payload());
             $this->fail('Expected a storage failure.');
@@ -188,7 +188,7 @@ class MqttIngestionTest extends TestCase
 
     public function test_validation_uses_configured_ids_and_accepts_exact_byte_limit(): void
     {
-        $payload = $this->payload(['readings' => ['temperature' => -10]]);
+        $payload = $this->payload(['readings' => ['ph' => -10]]);
         $this->assertSame('accepted', app(TelemetryIngestor::class)->ingest($this->topic(), str_pad($payload, 8192)));
         config(['monitoring.nodes' => [['id' => '2', 'name' => 'Node 2']]]);
         $this->expectException(InvalidTelemetry::class);
@@ -197,7 +197,7 @@ class MqttIngestionTest extends TestCase
 
     private function topic(string $node = '1'): string
     {
-        return 'rebung-pintar/v1/nodes/'.$node.'/telemetry';
+        return 'hidroponik/v1/nodes/'.$node.'/telemetry';
     }
 
     /** @param array<string, mixed> $overrides */
@@ -208,7 +208,7 @@ class MqttIngestionTest extends TestCase
             'message_id' => '5ef03860-30ae-44b2-a946-2ec66b397510',
             'node_id' => '1',
             'recorded_at' => '2026-09-16T00:00:00Z',
-            'readings' => ['temperature' => 27.5, 'air_humidity' => 70, 'soil_moisture' => 55],
+            'readings' => ['ph' => 6.2, 'water_temperature' => 24.5, 'water_level' => 75],
         ], $overrides), JSON_THROW_ON_ERROR);
     }
 }

@@ -38,7 +38,7 @@ android {
             }
         }
     }
-    namespace = "id.rebungpintar.rebung_pintar"
+    namespace = "id.hidroponikdft.hidroponik_dft"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -49,7 +49,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "id.rebungpintar.rebung_pintar"
+        applicationId = "id.hidroponikdft.hidroponik_dft"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

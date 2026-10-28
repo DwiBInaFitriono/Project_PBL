@@ -24,7 +24,7 @@ class TelemetrySubscriber
         $subscriptionFailed = false;
         $stopped = false;
         $receivedOnce = false;
-        $topics = array_map(fn (array $node): string => 'rebung-pintar/v1/nodes/'.$node['id'].'/telemetry', config('monitoring.nodes'));
+        $topics = array_map(fn (array $node): string => 'hidroponik/v1/nodes/'.$node['id'].'/telemetry', config('monitoring.nodes'));
 
         try {
             $client->connect($this->factory->settings(), true);

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Riwayat pembacaan {{ $filters['from'] }} — {{ $filters['to'] }} | Rebung Pintar</title>
+    <title>Riwayat pembacaan {{ $filters['from'] }} — {{ $filters['to'] }} | Hidroponik DFT</title>
     <style nonce="{{ Vite::cspNonce() }}">
         :root { color-scheme: light; font-family: "Trebuchet MS", "Segoe UI", sans-serif; color: #17233d; background: #f2f1ef; }
         * { box-sizing: border-box; }
@@ -69,7 +69,7 @@
         @endif
     </aside>
     <main class="report" aria-labelledby="report-title">
-        <p class="brand">Rebung Pintar</p>
+        <p class="brand">Hidroponik DFT</p>
         <h1 id="report-title">Riwayat pembacaan</h1>
         <dl class="report-filters">
             <div><dt>Node</dt><dd>{{ $filters['node'] !== null ? $nodes[$filters['node']]['name'] : 'Semua node' }}</dd></div>

@@ -17,7 +17,7 @@ class HistoryPdfTest extends TestCase
     {
         $this->freezeTime();
         $rows = SensorReading::factory()->count(5001)->make([
-            'node_id' => '1', 'sensor_id' => 'temperature', 'value' => 12345.75,
+            'node_id' => '1', 'sensor_id' => 'ph', 'value' => 12345.75,
             'recorded_at' => now()->subHour(),
         ])->map(fn (SensorReading $reading): array => $reading->getAttributes());
         foreach ($rows->chunk(500) as $chunk) {
@@ -47,20 +47,20 @@ class HistoryPdfTest extends TestCase
     {
         $this->travelTo(Carbon::parse('2026-09-17 12:00:00', 'UTC'));
         $rows = SensorReading::factory()->count(5000)->make([
-            'node_id' => '2', 'sensor_id' => 'temperature', 'value' => 0,
+            'node_id' => '2', 'sensor_id' => 'ph', 'value' => 0,
             'recorded_at' => '2026-09-16 17:00:00',
         ])->map(fn (SensorReading $reading): array => $reading->getAttributes());
         foreach ($rows->chunk(500) as $chunk) {
             SensorReading::query()->insert($chunk->all());
         }
         foreach ([
-            ['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => '2026-09-16 17:00:00'],
+            ['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => '2026-09-16 17:00:00'],
             ['node_id' => '2', 'sensor_id' => 'air_humidity', 'recorded_at' => '2026-09-16 17:00:00'],
-            ['node_id' => '2', 'sensor_id' => 'temperature', 'recorded_at' => '2026-09-16 16:59:59'],
+            ['node_id' => '2', 'sensor_id' => 'ph', 'recorded_at' => '2026-09-16 16:59:59'],
         ] as $outside) {
             SensorReading::factory()->create($outside);
         }
-        $filters = ['node' => '2', 'sensor' => 'temperature', 'from' => '2026-09-17', 'to' => '2026-09-17', 'timezone' => 'Asia/Jakarta', 'page' => 2];
+        $filters = ['node' => '2', 'sensor' => 'ph', 'from' => '2026-09-17', 'to' => '2026-09-17', 'timezone' => 'Asia/Jakarta', 'page' => 2];
 
         $response = $this->actingAs(User::factory()->create())->get(route('history.export', $filters));
 
@@ -74,10 +74,10 @@ class HistoryPdfTest extends TestCase
     {
         $this->travelTo(Carbon::parse('2026-09-17 12:00:00', 'UTC'));
         SensorReading::factory()->create([
-            'node_id' => '2', 'sensor_id' => 'temperature', 'value' => -2.5,
+            'node_id' => '2', 'sensor_id' => 'ph', 'value' => -2.5,
             'recorded_at' => '2026-09-16 17:00:00',
         ]);
-        $filters = ['node' => '2', 'sensor' => 'temperature', 'from' => '2026-09-17', 'to' => '2026-09-17', 'timezone' => 'Asia/Jakarta'];
+        $filters = ['node' => '2', 'sensor' => 'ph', 'from' => '2026-09-17', 'to' => '2026-09-17', 'timezone' => 'Asia/Jakarta'];
 
         $response = $this->actingAs(User::factory()->create())->get(route('history.export', $filters));
 
@@ -85,9 +85,9 @@ class HistoryPdfTest extends TestCase
             ->assertHeader('X-Content-Type-Options', 'nosniff')
             ->assertViewIs('history.export')->assertViewHas('filters', $filters)
             ->assertSeeText('Rebung Pintar')->assertSeeText('Riwayat pembacaan')
-            ->assertSeeText('Node 2')->assertSeeText('Suhu udara')->assertSeeText('2026-09-17')
+            ->assertSeeText('Node Iklim')->assertSeeText('pH nutrisi')->assertSeeText('2026-09-17')
             ->assertSeeText('Waktu (WIB)')->assertSeeText('2026-09-17 00:00:00')
-            ->assertSeeText('-2.5')->assertSeeText('°C')->assertSeeText('Total: 1 pembacaan')
+            ->assertSeeText('-2.5')->assertSeeText('pH')->assertSeeText('Total: 1 pembacaan')
             ->assertSeeText('Cetak / Simpan PDF')->assertSeeText('Ctrl+P')
             ->assertSee('id="print-report" type="button"', false)
             ->assertSee('window.print()', false)->assertSee('@media print', false)

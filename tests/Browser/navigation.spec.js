@@ -6,13 +6,13 @@ test('judul dashboard lebih besar dan setiap menu node memiliki ikon', async ({ 
     await expect(page.locator('.workspace-label')).toHaveCSS('font-size', '22px');
     const sidebar = page.locator('[data-sidebar]');
     await expect(sidebar.getByRole('link', { name: 'Dashboard', exact: true })).toHaveCSS('font-size', '15px');
-    for (const id of ['1', '2']) {
-        const toggle = sidebar.getByRole('button', { name: `Menu Node ${id}`, exact: true });
+    for (const [id, name] of [['1', 'Node Nutrisi'], ['2', 'Node Iklim']]) {
+        const toggle = sidebar.getByRole('button', { name: `Menu ${name}`, exact: true });
         await expect(toggle.locator('[data-nav-icon="node"]')).toBeVisible();
-        await expect(toggle).toHaveAttribute('title', `Node ${id}`);
+        await expect(toggle).toHaveAttribute('title', name);
         await toggle.click();
         const links = sidebar.locator(`#node-${id}-menu a`);
-        await expect(links).toHaveCount(5);
+        await expect(links).toHaveCount(6);
         for (const link of await links.all()) {
             await expect(link.locator('[data-nav-icon]')).toBeVisible();
             await expect(link.locator('[data-nav-icon]')).toHaveAttribute('aria-hidden', 'true');
@@ -33,12 +33,12 @@ test('sidebar desktop menjadi ikon dan preferensinya bertahan saat reload', asyn
     await expect(page.locator('[data-workspace]')).toHaveCSS('margin-left', '80px');
     await expect(sidebar.locator('.sidebar-menu-label').first()).toBeHidden();
     await expect(sidebar.getByRole('link', { name: 'Dashboard', exact: true }).locator('svg')).toBeVisible();
-    await expect(sidebar.getByRole('button', { name: 'Menu Node 2', exact: true }).locator('[data-nav-icon="node"]')).toBeVisible();
+    await expect(sidebar.getByRole('button', { name: 'Menu Node Iklim', exact: true }).locator('[data-nav-icon="node"]')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1440);
     await page.screenshot({ path: testInfo.outputPath('sidebar-icons.png'), fullPage: true });
     await page.reload();
     await expect(sidebar).toHaveCSS('width', '80px');
-    await sidebar.getByRole('button', { name: 'Menu Node 2', exact: true }).click();
+    await sidebar.getByRole('button', { name: 'Menu Node Iklim', exact: true }).click();
     await expect(sidebar).toHaveCSS('width', '240px');
     await expect(sidebar.locator('#node-2-menu')).toBeVisible();
     await expect(control).toHaveAccessibleName('Ringkas sidebar');
@@ -67,7 +67,7 @@ test('preferensi ringkas tidak menyembunyikan submenu atau fokus saat diperluas'
     await page.setViewportSize({ width: 1440, height: 900 });
     await openDashboard(page, dashboardHtml);
     const sidebar = page.locator('[data-sidebar]');
-    const node = sidebar.getByRole('button', { name: 'Menu Node 1', exact: true });
+    const node = sidebar.getByRole('button', { name: 'Menu Node Nutrisi', exact: true });
     await node.click();
     await page.locator('[data-sidebar-collapse]').click();
     await expect(node).toHaveAttribute('aria-expanded', 'false');

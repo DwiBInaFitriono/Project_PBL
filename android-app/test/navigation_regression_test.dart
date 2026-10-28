@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rebung_pintar/main.dart';
+import 'package:hidroponik_dft/main.dart';
 
 Future<void> openApp(WidgetTester tester) async {
   await tester.pumpWidget(const MainApp());
@@ -130,11 +130,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('menu-node-1')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('nav-node-1-temperature')), findsOneWidget);
-    await tester.tap(find.byKey(const Key('nav-node-1-temperature')));
+    expect(find.byKey(const Key('nav-node-1-ph')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('nav-node-1-ph')));
     await tester.pumpAndSettle();
     final button = tester.widget<TextButton>(
-      find.byKey(const Key('nav-node-1-temperature')),
+      find.byKey(const Key('nav-node-1-ph')),
     );
     expect(button.style!.backgroundColor!.resolve({}), const Color(0xFFF7B700));
   });

@@ -6,7 +6,7 @@ for (const viewport of [{ width: 1440, height: 600 }, { width: 360, height: 568 
         await openDashboard(page, dashboardHtml);
         const sidebar = page.locator('[data-sidebar]');
         if (viewport.width < 1025) await page.locator('[data-sidebar-trigger]').click();
-        await sidebar.getByRole('button', { name: 'Menu Node 2', exact: true }).click();
+        await sidebar.getByRole('button', { name: 'Menu Node Iklim', exact: true }).click();
         const account = sidebar.getByRole('link', { name: 'Setting Akun', exact: true });
         const before = await account.boundingBox();
         expect(before.y + before.height).toBeGreaterThan(viewport.height - 50);

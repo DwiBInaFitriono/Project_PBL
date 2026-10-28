@@ -64,7 +64,7 @@ test('kartu sensor dan kontrol tetap terbaca di ponsel sempit', async ({ page, r
 
 test('riwayat berisi data tetap terbaca dan dapat digeser tanpa menggeser halaman', async ({ page, renderPage }, testInfo) => {
     await page.setViewportSize({ width: 320, height: 568 });
-    const sensor = { id: 'temperature', name: 'Suhu udara', unit: '°C', decimals: 1 };
+    const sensor = { id: 'air_temperature', name: 'Suhu udara', unit: '°C', decimals: 1 };
     const data = {
         sensors: [sensor],
         nodes: ['1', '2'].map((id) => ({ id, name: `Node ${id}`, sensors: [{ ...sensor, value: 27, readings: [{ recorded_at: '2026-01-01T10:00:00Z', value: 27 }] }] })),
@@ -72,7 +72,7 @@ test('riwayat berisi data tetap terbaca dan dapat digeser tanpa menggeser halama
     };
     await page.route('**/dashboard', (route) => route.fulfill({ contentType: 'text/html', body: withMonitoringData(renderPage('/dashboard'), data) }));
     // Static populated fixture exercises the same history table markup without writing application data.
-    const historyHtml = renderPage('/history').replace(/<tbody>[\s\S]*?<\/tbody>/, '<tbody><tr><td><time>2026-01-01 17:00:00</time></td><td>Node 1</td><td>Kelembapan tanah</td><td>72.5</td><td>%</td></tr></tbody>');
+    const historyHtml = renderPage('/history').replace(/<tbody>[\s\S]*?<\/tbody>/, '<tbody><tr><td><time>2026-01-01 17:00:00</time></td><td>Node Nutrisi</td><td>Debit air</td><td>72.5</td><td>%</td></tr></tbody>');
     await page.route('**/history', (route) => route.fulfill({ contentType: 'text/html', body: historyHtml }));
     for (const path of ['/dashboard', '/history']) {
         await page.goto(path);
@@ -133,7 +133,7 @@ for (const role of ['operator', 'viewer']) {
         await opener.click();
         await page.setViewportSize({ width: 844, height: 320 });
         await expect(page.locator('[data-sidebar]')).toBeVisible();
-        await page.getByRole('button', { name: 'Menu Node 2', exact: true }).click();
+        await page.getByRole('button', { name: 'Menu Node Iklim', exact: true }).click();
         const account = page.getByRole('link', { name: 'Setting Akun', exact: true });
         const box = await account.boundingBox();
         expect(box.y).toBeGreaterThanOrEqual(0);
@@ -190,8 +190,8 @@ for (const deviceName of ['iPhone SE', 'iPhone 13', 'Pixel 7', 'iPad Mini']) {
             expect(await page.evaluate(() => window.visualViewport.scale)).toBeCloseTo(1, 1);
             await page.goto('/dashboard');
             await page.locator('[data-sidebar-trigger]').tap();
-            await page.getByRole('button', { name: 'Menu Node 2', exact: true }).tap();
-            await page.getByRole('link', { name: 'Ringkasan Node 2', exact: true }).tap();
+            await page.getByRole('button', { name: 'Menu Node Iklim', exact: true }).tap();
+            await page.getByRole('link', { name: 'Ringkasan Node Iklim', exact: true }).tap();
             await expect(page).toHaveURL(/\/nodes\/2$/);
             await expect(page.locator('[data-sidebar]')).not.toBeVisible();
             await page.locator('[data-theme-toggle]').tap();
@@ -200,8 +200,8 @@ for (const deviceName of ['iPhone SE', 'iPhone 13', 'Pixel 7', 'iPad Mini']) {
             await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
             await page.goto('/history');
             await page.getByRole('combobox', { name: 'Parameter', exact: true }).tap();
-            await page.getByRole('option', { name: 'Kelembapan tanah', exact: true }).tap();
-            await expect(page.locator('select[name="sensor"]')).toHaveValue('soil_moisture');
+            await page.getByRole('option', { name: 'Debit air', exact: true }).tap();
+            await expect(page.locator('select[name="sensor"]')).toHaveValue('water_flow');
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(device.viewport.width);
             await page.screenshot({ path: testInfo.outputPath(`${deviceName.replaceAll(' ', '-')}.png`), fullPage: true });
         } finally {

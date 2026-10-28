@@ -2,9 +2,9 @@
     <div data-monitoring-root data-monitoring-url="{{ route('monitoring.data') }}" data-monitoring="{{ json_encode($monitoring) }}">
         <div class="dashboard-heading">
             <div>
-                <div class="eyebrow"><span></span> REBUNG PINTAR / MONITORING</div>
+                <div class="eyebrow"><span></span> HIDROPONIK DFT / MONITORING</div>
                 <h1>Ringkasan monitoring</h1>
-                <p class="form-intro">Pantau rebung bambu melalui node 1 dan node 2.</p>
+                <p class="form-intro">Pantau larutan nutrisi dan iklim DFT melalui dua node.</p>
             </div>
             <a class="dashboard-refresh dashboard-refresh-icon" href="{{ route('dashboard') }}" aria-label="Muat ulang" title="Muat ulang">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
@@ -53,7 +53,7 @@
         <x-monitoring.history-table />
 
         <div class="dashboard-bottom">
-            <span>Rebung Pintar adalah aplikasi monitoring rebung bambu melalui node 1 dan node 2.</span>
+            <span>Hidroponik DFT memantau larutan nutrisi dan iklim pada sistem DFT horizontal.</span>
             <span data-source-footer>Data perangkat belum tersedia</span>
         </div>
     </div>

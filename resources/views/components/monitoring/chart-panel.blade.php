@@ -1,7 +1,10 @@
 @props(['nodes', 'sensors', 'activeSensor' => null, 'activeHours' => 24])
 
 @php
-    $selectedSensor = collect($sensors)->firstWhere('id', $activeSensor) ?? $sensors[0];
+    $availableSensors = count($nodes) === 1
+        ? collect($sensors)->where('node_id', $nodes[0]['id'])->values()->all()
+        : $sensors;
+    $selectedSensor = collect($availableSensors)->firstWhere('id', $activeSensor) ?? $availableSensors[0];
     $singleNode = count($nodes) === 1;
 @endphp
 
@@ -16,7 +19,7 @@
     <div class="trend-card">
         <div class="chart-filters">
             <div class="sensor-tabs" role="group" aria-label="Pilih parameter grafik">
-                @foreach ($sensors as $sensor)
+                @foreach ($availableSensors as $sensor)
                     <button type="button" data-select-sensor="{{ $sensor['id'] }}" aria-pressed="{{ $selectedSensor['id'] === $sensor['id'] ? 'true' : 'false' }}">
                         {{ $sensor['name'] }}
                     </button>

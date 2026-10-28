@@ -36,7 +36,7 @@ class TelemetryValidator
         }
         if (! is_string($message->node_id)
             || ! in_array($message->node_id, array_column(config('monitoring.nodes'), 'id'), true)
-            || $topic !== 'rebung-pintar/v1/nodes/'.$message->node_id.'/telemetry') {
+            || $topic !== 'hidroponik/v1/nodes/'.$message->node_id.'/telemetry') {
             throw new InvalidTelemetry('Node atau topik MQTT tidak valid.');
         }
         if (! $message->readings instanceof stdClass || count(get_object_vars($message->readings)) === 0) {

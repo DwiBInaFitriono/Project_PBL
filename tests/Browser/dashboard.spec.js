@@ -9,13 +9,13 @@ for (const theme of ['light', 'dark']) {
         const activeMenu = sidebar.getByRole('link', { name: 'Dashboard', exact: true });
         await expect(activeMenu).toHaveCSS('background-color', 'rgb(161, 178, 234)');
         await expect(activeMenu).toHaveCSS('color', 'rgb(1, 30, 96)');
-        await sidebar.getByRole('button', { name: 'Menu Node 1', exact: true }).click();
-        await expect(sidebar.getByRole('button', { name: 'Menu Node 1', exact: true })).toHaveCSS('color', 'rgb(161, 178, 234)');
+        await sidebar.getByRole('button', { name: 'Menu Node Nutrisi', exact: true }).click();
+        await expect(sidebar.getByRole('button', { name: 'Menu Node Nutrisi', exact: true })).toHaveCSS('color', 'rgb(161, 178, 234)');
         const activeSensor = page.locator('[data-select-sensor][aria-pressed="true"]');
         await expect(activeSensor).toHaveCSS('background-color', theme === 'dark' ? 'rgb(161, 178, 234)' : 'rgb(1, 30, 96)');
         await expect(activeSensor).toHaveCSS('color', theme === 'dark' ? 'rgb(1, 30, 96)' : 'rgb(242, 241, 239)');
-        await page.getByRole('button', { name: 'Kelembapan tanah', exact: true }).click();
-        await expect(activeSensor).toHaveText('Kelembapan tanah');
+        await page.getByRole('button', { name: 'Debit air', exact: true }).click();
+        await expect(activeSensor).toHaveText('Debit air');
         await page.screenshot({ path: testInfo.outputPath('dashboard-blue.png'), fullPage: true });
         await page.goto('/login');
         await expect(page.locator('.primary-button')).toHaveCSS('background-color', theme === 'dark' ? 'rgb(247, 183, 0)' : 'rgb(1, 30, 96)');
@@ -35,9 +35,9 @@ test('kesalahan data dashboard tidak mematikan tombol tema', async ({ page, dash
 
 test('dashboard memakai pembacaan yang diberikan tanpa mengubah nol menjadi kosong', async ({ page, dashboardHtml }) => {
     const sensors = [
-        { id: 'temperature', name: 'Suhu udara', unit: '°C', decimals: 1 },
-        { id: 'air_humidity', name: 'Kelembapan udara', unit: '% RH', decimals: 1 },
-        { id: 'soil_moisture', name: 'Kelembapan tanah', unit: '%', decimals: 1 },
+        { id: 'ph', name: 'pH nutrisi', unit: 'pH', decimals: 1 },
+        { id: 'air_temperature', name: 'Suhu udara', unit: '°C', decimals: 1 },
+        { id: 'water_flow', name: 'Debit air', unit: 'L/menit', decimals: 1 },
     ];
     const readings = [
         { recorded_at: '2026-01-01T09:00:00Z', value: 4 },
@@ -51,33 +51,38 @@ test('dashboard memakai pembacaan yang diberikan tanpa mengubah nol menjadi koso
         nodes: ['1', '2'].map((id) => ({
             id,
             name: `Node ${id}`,
-            sensors: sensors.map((sensor) => ({ ...sensor, value: null, readings: sensor.id === 'temperature' ? readings : [] })),
+            sensors: sensors.map((sensor) => ({ ...sensor, value: null, readings: sensor.id === 'ph' ? readings : [] })),
         })),
         generatedAt: '2026-01-01T10:00:00Z',
     };
     await openDashboard(page, withMonitoringData(dashboardHtml, data));
-    await expect(page.locator('[data-sensor-node="1"][data-sensor-id="temperature"] [data-current-value]')).toHaveText('0,0');
+    await expect(page.locator('[data-sensor-node="1"][data-sensor-id="ph"] [data-current-value]')).toHaveText('0,0');
     await expect(page.locator('[data-chart-series]')).toHaveCount(2);
-    await expect(page.locator('[data-node-summary="1"] [data-summary-value="avg"]')).toHaveText('4,0 °C');
+    await expect(page.locator('[data-node-summary="1"] [data-summary-value="avg"]')).toHaveText('4,0 pH');
     await page.getByRole('button', { name: '1 jam', exact: true }).click();
-    await expect(page.locator('[data-node-summary="1"] [data-summary-value="avg"]')).toHaveText('2,0 °C');
+    await expect(page.locator('[data-node-summary="1"] [data-summary-value="avg"]')).toHaveText('2,0 pH');
     await expect(page.locator('[data-history-body] tr')).toHaveCount(4);
-    await page.getByRole('button', { name: 'Kelembapan tanah', exact: true }).click();
+    await page.getByRole('button', { name: 'Debit air', exact: true }).click();
     await expect(page.locator('[data-chart-empty]')).toBeVisible();
     await expect(page.locator('[data-chart-series]')).toHaveCount(0);
 });
 
-test('dashboard memiliki enam kanal sensor tanpa kode simulasi', async ({ page, dashboardHtml }) => {
+test('dashboard memiliki tujuh kanal sensor tanpa kode simulasi', async ({ page, dashboardHtml }) => {
     await openDashboard(page, dashboardHtml);
     await expect(page.locator('[data-demo-toggle]')).toHaveCount(0);
-    await expect(page.locator('[data-sensor-reading]')).toHaveCount(6);
-    for (const node of await page.locator('[data-node-id]').all()) {
-        await expect(node.locator('[data-sensor-reading]')).toHaveCount(3);
-        await expect(node).toContainText('Suhu udara');
-        await expect(node).toContainText('Kelembapan udara');
-        await expect(node).toContainText('Kelembapan tanah');
-        await expect(node).toContainText('Menunggu integrasi');
-    }
+    await expect(page.locator('[data-sensor-reading]')).toHaveCount(7);
+    const nutrient = page.locator('[data-node-id="1"]');
+    await expect(nutrient.locator('[data-sensor-reading]')).toHaveCount(3);
+    await expect(nutrient).toContainText('pH nutrisi');
+    await expect(nutrient).not.toContainText('TDS nutrisi');
+    await expect(nutrient).toContainText('Suhu air');
+    await expect(nutrient).toContainText('Level tandon');
+    const climate = page.locator('[data-node-id="2"]');
+    await expect(climate.locator('[data-sensor-reading]')).toHaveCount(4);
+    await expect(climate).toContainText('Suhu udara');
+    await expect(climate).toContainText('Kelembapan udara');
+    await expect(climate).toContainText('Intensitas cahaya');
+    await expect(climate).toContainText('Debit air');
     for (const value of await page.locator('[data-current-value]').all()) {
         await expect(value).toHaveText('—');
     }
@@ -88,11 +93,11 @@ test('dashboard memiliki enam kanal sensor tanpa kode simulasi', async ({ page, 
 
 test('filter sensor dan waktu tetap dapat digunakan tanpa pembacaan', async ({ page, dashboardHtml }) => {
     await openDashboard(page, dashboardHtml);
-    await page.getByRole('button', { name: 'Kelembapan tanah', exact: true }).click();
+    await page.getByRole('button', { name: 'Debit air', exact: true }).click();
     await page.getByRole('button', { name: '6 jam', exact: true }).click();
-    await expect(page.locator('[data-active-sensor]')).toHaveText('Kelembapan tanah · %');
+    await expect(page.locator('[data-active-sensor]')).toHaveText('Debit air · L/menit');
     await expect(page.getByRole('button', { name: '6 jam', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('[data-chart]')).toHaveAttribute('aria-label', /Kelembapan tanah.*6 jam/);
+    await expect(page.locator('[data-chart]')).toHaveAttribute('aria-label', /Debit air.*6 jam/);
     for (const value of await page.locator('[data-summary-value]').all()) await expect(value).toHaveText('—');
     for (const button of await page.locator('[data-select-sensor], [data-select-range]').all()) {
         expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(44);

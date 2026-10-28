@@ -57,7 +57,10 @@ class AppSidebar extends StatelessWidget {
                           child: FittedBox(
                             alignment: Alignment.centerLeft,
                             fit: BoxFit.scaleDown,
-                            child: SizedBox(width: 176, child: RebungBrand()),
+                            child: SizedBox(
+                              width: 176,
+                              child: HidroponikBrand(),
+                            ),
                           ),
                         ),
                       ),
@@ -71,7 +74,7 @@ class AppSidebar extends StatelessWidget {
                   )
                 else
                   const Tooltip(
-                    message: 'Rebung Pintar',
+                    message: 'Hidroponik DFT',
                     child: Icon(Icons.grass_rounded, size: 30),
                   ),
                 const SizedBox(height: 20),
@@ -155,7 +158,7 @@ class AppSidebar extends StatelessWidget {
                                     keyName: 'nav-node-$node',
                                     small: true,
                                   ),
-                                  for (final sensor in sensors)
+                                  for (final sensor in sensorsForNode(node))
                                     _link(
                                       context,
                                       sensor.name,

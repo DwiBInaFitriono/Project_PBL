@@ -19,7 +19,7 @@ class MqttLocalBrokerTest extends TestCase
 
             $this->assertDatabaseCount('mqtt_messages', 1);
             $this->assertDatabaseCount('sensor_readings', 1);
-            $this->assertDatabaseHas('sensor_readings', ['node_id' => '1', 'sensor_id' => 'temperature', 'value' => 28.25]);
+            $this->assertDatabaseHas('sensor_readings', ['node_id' => '1', 'sensor_id' => 'ph', 'value' => 28.25]);
             $this->assertSame('PUBACK+DISCONNECT', trim((string) fgets($output)));
         });
     }
@@ -204,7 +204,7 @@ class MqttLocalBrokerTest extends TestCase
             $ids = [];
             for ($index = 0; $index < 2; $index++) {
                 [$header, $body] = $packet();
-                $topic = 'rebung-pintar/v1/nodes/'.($index + 1).'/telemetry';
+                $topic = 'hidroponik/v1/nodes/'.($index + 1).'/telemetry';
                 if ($header !== 0x82 || substr($body, 2) !== pack('n', strlen($topic)).$topic."\x01") {
                     throw new \RuntimeException('Expected exact telemetry SUBSCRIBE with QoS 1.');
                 }
@@ -222,10 +222,10 @@ class MqttLocalBrokerTest extends TestCase
 
             $publish = $scenario === 'success' || $earlyMessage;
             if ($publish) {
-                $topic = 'rebung-pintar/v1/nodes/1/telemetry';
+                $topic = 'hidroponik/v1/nodes/1/telemetry';
                 $payload = json_encode([
                     'schema_version' => 1, 'message_id' => '5ef03860-30ae-44b2-a946-2ec66b397510', 'node_id' => '1',
-                    'recorded_at' => gmdate('Y-m-d\TH:i:s\Z'), 'readings' => ['temperature' => 28.25],
+                    'recorded_at' => gmdate('Y-m-d\TH:i:s\Z'), 'readings' => ['ph' => 28.25],
                 ], JSON_THROW_ON_ERROR);
                 $body = pack('n', strlen($topic)).$topic."\x00\x01".$payload;
                 $length = strlen($body);

@@ -37,8 +37,8 @@ class SecurityRegressionTest extends TestCase
             $this->assertGuest();
         }
         $this->actingAs(User::first());
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature']);
-        foreach (['node' => "1' OR 1=1--", 'sensor' => "temperature'; DROP TABLE users;--", 'from' => "2026-01-01' OR '1'='1", 'page' => '1 UNION SELECT 1'] as $key => $value) {
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph']);
+        foreach (['node' => "1' OR 1=1--", 'sensor' => "ph'; DROP TABLE users;--", 'from' => "2026-01-01' OR '1'='1", 'page' => '1 UNION SELECT 1'] as $key => $value) {
             $this->getJson('/history?'.http_build_query([$key => $value]))->assertUnprocessable();
             $this->getJson('/history/export?'.http_build_query([$key => $value]))->assertUnprocessable();
         }

@@ -3,11 +3,24 @@ import 'package:flutter/material.dart';
 import 'app_palette.dart';
 
 const sensors = <({String id, String name, String unit, IconData icon})>[
+  (id: 'ph', name: 'pH nutrisi', unit: 'pH', icon: Icons.science_outlined),
   (
-    id: 'temperature',
-    name: 'Suhu udara',
+    id: 'water_temperature',
+    name: 'Suhu air',
     unit: '°C',
     icon: Icons.thermostat_outlined,
+  ),
+  (
+    id: 'water_level',
+    name: 'Ketinggian air',
+    unit: 'cm',
+    icon: Icons.water_outlined,
+  ),
+  (
+    id: 'air_temperature',
+    name: 'Suhu udara',
+    unit: '°C',
+    icon: Icons.device_thermostat_outlined,
   ),
   (
     id: 'air_humidity',
@@ -16,12 +29,26 @@ const sensors = <({String id, String name, String unit, IconData icon})>[
     icon: Icons.water_drop_outlined,
   ),
   (
-    id: 'soil_moisture',
-    name: 'Kelembapan tanah',
-    unit: '%',
-    icon: Icons.grass_outlined,
+    id: 'light_intensity',
+    name: 'Intensitas cahaya',
+    unit: 'lux',
+    icon: Icons.wb_sunny_outlined,
+  ),
+  (
+    id: 'water_flow',
+    name: 'Aliran air',
+    unit: 'L/menit',
+    icon: Icons.waterfall_chart_outlined,
   ),
 ];
+
+List<({String id, String name, String unit, IconData icon})> sensorsForNode(
+  int node,
+) => switch (node) {
+  1 => sensors.take(3).toList(growable: false),
+  2 => sensors.skip(3).toList(growable: false),
+  _ => const [],
+};
 
 class SurfaceCard extends StatelessWidget {
   const SurfaceCard({super.key, required this.child, this.padding = 20});
@@ -222,7 +249,7 @@ class NodeCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          for (final sensor in sensors)
+          for (final sensor in sensorsForNode(node))
             _sensorRow(context, sensor, monitoringSensor(data, sensor.id)),
         ],
       ),

@@ -1,13 +1,15 @@
 @props(['nodes', 'sensorCount', 'sensors'])
 
+@php($parametersPerNode = count($nodes) > 0 ? (int) ($sensorCount / count($nodes)) : 0)
+
 <section class="monitoring-overview" aria-label="Ringkasan sistem">
     <div>
         <span>Node pemantauan</span>
         <strong>{{ count($nodes) }} <small>node</small></strong>
     </div>
     <div>
-        <span>Kanal sensor usulan</span>
-        <strong>{{ $sensorCount }} <small>{{ count($sensors) }} per node</small></strong>
+        <span>Parameter pemantauan</span>
+        <strong>{{ $sensorCount }} <small>{{ $parametersPerNode }} per node</small></strong>
     </div>
     <div>
         <span>Pembacaan terakhir</span>

@@ -39,15 +39,15 @@ class HistoryTest extends TestCase
     public function test_history_and_export_exclude_invalid_values_and_unknown_channels(): void
     {
         $this->freezeTime();
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'value' => -2.5]);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'value' => -2.5]);
         foreach (['NaN', 'invalid', '1e9999'] as $invalid) {
             DB::table('sensor_readings')->insert([
-                'node_id' => '1', 'sensor_id' => 'temperature', 'value' => $invalid, 'recorded_at' => now(),
+                'node_id' => '1', 'sensor_id' => 'ph', 'value' => $invalid, 'recorded_at' => now(),
             ]);
         }
         SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'unknown']);
-        SensorReading::factory()->create(['node_id' => '99', 'sensor_id' => 'temperature']);
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => now()->addSecond()]);
+        SensorReading::factory()->create(['node_id' => '99', 'sensor_id' => 'ph']);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => now()->addSecond()]);
         $this->actingAs(User::factory()->create());
 
         $this->get('/history')->assertOk()->assertSeeText('366 hari')
@@ -68,10 +68,10 @@ class HistoryTest extends TestCase
             'monitoring.sensors.0.name' => "+SUM(1,2)\n<svg onload=alert(1)>",
             'monitoring.sensors.0.unit' => '@command<img src=x onerror=alert(1)>',
         ]);
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'value' => 0]);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'value' => 0]);
         $this->actingAs(User::factory()->create());
 
-        $response = $this->get('/history/export?node=1&sensor=temperature')->assertOk()
+        $response = $this->get('/history/export?node=1&sensor=ph')->assertOk()
             ->assertSee(config('monitoring.nodes.0.name'))
             ->assertSee(config('monitoring.sensors.0.name'))
             ->assertSee(config('monitoring.sensors.0.unit'))
@@ -92,18 +92,18 @@ class HistoryTest extends TestCase
         $expected = [];
         for ($index = 0; $index < 510; $index++) {
             $reading = SensorReading::factory()->create([
-                'node_id' => '2', 'sensor_id' => 'temperature', 'value' => $index,
+                'node_id' => '2', 'sensor_id' => 'ph', 'value' => $index,
                 'recorded_at' => $index % 2 === 0 ? '2026-09-14 23:59:59' : '2026-09-13 00:00:00',
             ]);
             $expected[] = $reading;
         }
         $expected = collect($expected)->sortByDesc(fn (SensorReading $reading): string => $reading->recorded_at->format('Y-m-d H:i:s').sprintf('%010d', $reading->id))->pluck('value')->all();
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'value' => 9999, 'recorded_at' => '2026-09-14 12:00:00']);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'value' => 9999, 'recorded_at' => '2026-09-14 12:00:00']);
         SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'air_humidity', 'value' => 9999, 'recorded_at' => '2026-09-14 12:00:00']);
-        SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'temperature', 'value' => 9999, 'recorded_at' => '2026-09-15 00:00:00']);
+        SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'ph', 'value' => 9999, 'recorded_at' => '2026-09-15 00:00:00']);
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/history/export?node=2&sensor=temperature&from=2026-09-13&to=2026-09-14&page=2&timezone=UTC');
+        $response = $this->actingAs($user)->get('/history/export?node=2&sensor=ph&from=2026-09-13&to=2026-09-14&page=2&timezone=UTC');
 
         $response->assertOk()->assertViewIs('history.export')->assertHeader('Content-Type', 'text/html; charset=UTF-8')
             ->assertSeeText('Total: 510 pembacaan')->assertSeeText('Waktu (UTC)');
@@ -115,7 +115,7 @@ class HistoryTest extends TestCase
         $rows = $this->reportRows($content);
         $this->assertCount(510, $rows);
         $this->assertSame($expected, array_map(fn (array $row): float => (float) $row[3], $rows));
-        $this->assertSame(['2026-09-14 23:59:59', 'Node 2', 'Suhu udara', '508', '°C'], $rows[0]);
+        $this->assertSame(['2026-09-14 23:59:59', 'Node Iklim', 'pH nutrisi', '508', 'pH'], $rows[0]);
         $this->getJson('/history/export?node[]=2')->assertUnprocessable()->assertJsonValidationErrors('node');
     }
 
@@ -154,7 +154,7 @@ class HistoryTest extends TestCase
         $this->withoutMiddleware(ThrottleRequests::class);
         $this->actingAs(User::factory()->create());
         foreach ([
-            ['node=3', 'node'], ['node[]=1', 'node'], ['sensor=nope', 'sensor'], ['sensor[]=temperature', 'sensor'],
+            ['node=3', 'node'], ['node[]=1', 'node'], ['sensor=nope', 'sensor'], ['sensor[]=ph', 'sensor'],
             ['from[]=2026-01-01', 'from'], ['to[]=2026-01-01', 'to'],
             ['from=2026-02-30', 'from'], ['from=not-a-date', 'from'], ['to=2026-2-1', 'to'],
             ['from=2026-09-15&to=2026-09-14', 'to'],
@@ -172,18 +172,18 @@ class HistoryTest extends TestCase
     public function test_filters_use_inclusive_utc_dates_and_retain_the_query_on_pagination(): void
     {
         $this->travelTo(Carbon::parse('2026-09-16 12:00:00', 'UTC'));
-        SensorReading::factory()->count(25)->create(['node_id' => '2', 'sensor_id' => 'soil_moisture', 'recorded_at' => '2026-08-20 00:00:00']);
-        $latest = SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'soil_moisture', 'value' => 0, 'recorded_at' => '2026-08-21 23:59:59']);
+        SensorReading::factory()->count(25)->create(['node_id' => '2', 'sensor_id' => 'water_flow', 'recorded_at' => '2026-08-20 00:00:00']);
+        $latest = SensorReading::factory()->create(['node_id' => '2', 'sensor_id' => 'water_flow', 'value' => 0, 'recorded_at' => '2026-08-21 23:59:59']);
         foreach ([
             ['node_id' => '1', 'recorded_at' => '2026-08-21 12:00:00'],
-            ['sensor_id' => 'temperature', 'recorded_at' => '2026-08-21 12:00:00'],
+            ['sensor_id' => 'ph', 'recorded_at' => '2026-08-21 12:00:00'],
             ['recorded_at' => '2026-08-19 23:59:59'],
             ['recorded_at' => '2026-08-22 00:00:00'],
         ] as $outside) {
-            SensorReading::factory()->create([...['node_id' => '2', 'sensor_id' => 'soil_moisture'], ...$outside]);
+            SensorReading::factory()->create([...['node_id' => '2', 'sensor_id' => 'water_flow'], ...$outside]);
         }
 
-        $response = $this->actingAs(User::factory()->create())->get('/history?node=2&sensor=soil_moisture&from=2026-08-20&to=2026-08-21&timezone=UTC');
+        $response = $this->actingAs(User::factory()->create())->get('/history?node=2&sensor=water_flow&from=2026-08-20&to=2026-08-21&timezone=UTC');
 
         $response->assertOk();
         $rows = $response->viewData('readings');
@@ -191,7 +191,7 @@ class HistoryTest extends TestCase
         $this->assertSame($latest->id, $rows->first()->id);
         $this->assertSame(0.0, $rows->first()->value);
         parse_str(parse_url($rows->nextPageUrl(), PHP_URL_QUERY), $query);
-        $this->assertSame(['node' => '2', 'sensor' => 'soil_moisture', 'from' => '2026-08-20', 'to' => '2026-08-21', 'timezone' => 'UTC', 'page' => '2'], $query);
+        $this->assertSame(['node' => '2', 'sensor' => 'water_flow', 'from' => '2026-08-20', 'to' => '2026-08-21', 'timezone' => 'UTC', 'page' => '2'], $query);
         $this->get('/history?node=1&sensor=air_humidity&from=2026-08-20&to=2026-08-21&timezone=UTC')->assertSeeText('Belum ada pembacaan untuk filter ini.');
     }
 
@@ -199,9 +199,9 @@ class HistoryTest extends TestCase
     {
         $this->get('/history')->assertRedirect('/login');
         $this->travelTo(Carbon::parse('2026-09-16 12:00:00', 'UTC'));
-        SensorReading::factory()->count(27)->create(['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => '2026-09-10 00:00:00']);
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => '2026-09-09 23:59:59']);
-        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'temperature', 'recorded_at' => now()->addSecond()]);
+        SensorReading::factory()->count(27)->create(['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => '2026-09-10 00:00:00']);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => '2026-09-09 23:59:59']);
+        SensorReading::factory()->create(['node_id' => '1', 'sensor_id' => 'ph', 'recorded_at' => now()->addSecond()]);
 
         $response = $this->actingAs(User::factory()->create())->get('/history?timezone=UTC');
 

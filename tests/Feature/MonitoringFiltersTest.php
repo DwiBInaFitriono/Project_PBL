@@ -15,8 +15,8 @@ class MonitoringFiltersTest extends TestCase
         $this->withoutVite();
         $this->actingAs(User::factory()->create());
         foreach (['/dashboard', '/nodes/2'] as $path) {
-            $this->get($path.'?sensor=soil_moisture&hours=6')->assertOk()
-                ->assertViewHas('activeSensor', 'soil_moisture')
+            $this->get($path.'?sensor=water_level&hours=6')->assertOk()
+                ->assertViewHas('activeSensor', 'water_level')
                 ->assertViewHas('activeHours', 6)
                 ->assertSee('data-select-range="6" aria-pressed="true"', false);
         }

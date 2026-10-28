@@ -17,7 +17,9 @@ class EspSettingsPage extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       const SectionTitle('Konfigurasi perangkat', ''),
-      const InfoNotice('PRATINJAU · MQTT belum aktif.'),
+      const InfoNotice(
+        'PRATINJAU · Ingest perangkat melalui MQTT di server belum aktif.',
+      ),
       const SizedBox(height: 24),
       TwoColumns(
         children: [
@@ -38,7 +40,7 @@ class EspSettingsPage extends StatelessWidget {
                   const SizedBox(height: 10),
                   const Text('Belum terhubung', style: TextStyle(fontSize: 13)),
                   const Divider(height: 28),
-                  for (final sensor in sensors)
+                  for (final sensor in sensorsForNode(node))
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Row(
@@ -80,124 +82,6 @@ class EspSettingsPage extends StatelessWidget {
     ],
   );
 }
-
-
-class SystemConfigCard extends StatefulWidget {
-  const SystemConfigCard({super.key});
-
-  @override
-  State<SystemConfigCard> createState() => _SystemConfigCardState();
-}
-
-class _SystemConfigCardState extends State<SystemConfigCard> {
-  final _hostController = TextEditingController(text: '127.0.0.1');
-  final _portController = TextEditingController(text: '1883');
-  double _soilThreshold = 35.0;
-  double _tempThreshold = 32.0;
-  bool _autoAlarm = true;
-
-  @override
-  void dispose() {
-    _hostController.dispose();
-    _portController.dispose();
-    super.dispose();
-  }
-
-  void _saveConfig() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Konfigurasi sistem & ambang batas berhasil disimpan!'),
-        backgroundColor: Color(0xFF2E7D32),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SurfaceCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Pengaturan Parameter & Ambang Batas',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _hostController,
-            decoration: const InputDecoration(
-              labelText: 'Host Broker MQTT / Domain',
-              hintText: '192.168.1.100 atau domain cloudflare',
-              prefixIcon: Icon(Icons.cloud_outlined),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _portController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Port Broker MQTT',
-              hintText: '1883 (TCP) atau 9001 (WS)',
-              prefixIcon: Icon(Icons.numbers_outlined),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Batas Minimum Kelembapan Tanah: ${_soilThreshold.round()}%',
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          ),
-          Slider(
-            value: _soilThreshold,
-            min: 10,
-            max: 80,
-            divisions: 14,
-            label: '${_soilThreshold.round()}%',
-            onChanged: (val) => setState(() => _soilThreshold = val),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Batas Maksimum Suhu Udara: ${_tempThreshold.round()}°C',
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          ),
-          Slider(
-            value: _tempThreshold,
-            min: 20,
-            max: 45,
-            divisions: 25,
-            label: '${_tempThreshold.round()}°C',
-            onChanged: (val) => setState(() => _tempThreshold = val),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Alarm & Rekomendasi Otomatis', style: TextStyle(fontSize: 14)),
-                    Text('Memicu indikator saat melewati ambang batas', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  ],
-                ),
-              ),
-              Switch(
-                value: _autoAlarm,
-                onChanged: (val) => setState(() => _autoAlarm = val),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: _saveConfig,
-            icon: const Icon(Icons.save_outlined, size: 18),
-            label: const Text('Simpan Konfigurasi'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 
 class AccountSettingsPage extends StatelessWidget {
   const AccountSettingsPage({super.key, this.api, this.onSessionExpired});
@@ -425,7 +309,7 @@ class _LiveSettingsState extends State<_LiveSettings> {
       const SizedBox(height: 20),
       Text(
         data['integration']['mqtt_enabled'] == true
-            ? 'MQTT aktif di server'
+            ? 'Ingest MQTT aktif di server'
             : 'MQTT nonaktif di server',
       ),
       const SizedBox(height: 8),
@@ -464,8 +348,6 @@ class _LiveSettingsState extends State<_LiveSettings> {
         ],
       ),
       const SizedBox(height: 20),
-      const SystemConfigCard(),
     ],
   );
 }
-

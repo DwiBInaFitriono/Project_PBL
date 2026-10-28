@@ -11,9 +11,9 @@ test('drawer mobile menutup dengan Escape dan overlay serta mengembalikan fokus'
     await expect(opener).toHaveAttribute('aria-expanded', 'true');
     await expect(page.locator('[data-workspace]')).toHaveAttribute('inert', '');
     await expect(page.getByRole('button', { name: 'Tutup navigasi', exact: true })).toBeFocused();
-    await sidebar.getByRole('button', { name: 'Menu Node 2', exact: true }).click();
+    await sidebar.getByRole('button', { name: 'Menu Node Iklim', exact: true }).click();
     await expect(sidebar.locator('#node-2-menu')).toBeVisible();
-    const firstLink = sidebar.getByRole('link', { name: 'Rebung Pintar — beranda', exact: true });
+    const firstLink = sidebar.getByRole('link').first();
     const lastLink = sidebar.getByRole('link', { name: 'Setting Akun', exact: true });
     await firstLink.focus();
     await page.keyboard.press('Shift+Tab');
@@ -39,40 +39,40 @@ test('tautan sidebar membuka halaman node dan parameter yang sesuai', async ({ p
     });
     await page.goto('/dashboard');
     const sidebar = page.locator('[data-sidebar]');
-    await sidebar.getByRole('button', { name: 'Menu Node 1', exact: true }).click();
-    await sidebar.getByRole('link', { name: 'Ringkasan Node 1', exact: true }).click();
+    await sidebar.getByRole('button', { name: 'Menu Node Nutrisi', exact: true }).click();
+    await sidebar.getByRole('link', { name: 'Ringkasan Node Nutrisi', exact: true }).click();
     await expect(page).toHaveURL(/\/nodes\/1$/);
-    await expect(page.getByRole('heading', { name: 'Monitoring Node 1', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Monitoring Node Nutrisi', exact: true })).toBeVisible();
     await expect(page.locator('[data-node-id]')).toHaveCount(1);
-    await expect(page.locator('[data-node-id="1"] [data-sensor-reading]')).toHaveCount(3);
-    await expect(sidebar.getByRole('link', { name: 'Ringkasan Node 1', exact: true })).toHaveAttribute('aria-current', 'page');
-    await expect(sidebar.getByRole('button', { name: 'Menu Node 1', exact: true })).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('[data-node-id="1"] [data-sensor-reading]')).toHaveCount(4);
+    await expect(sidebar.getByRole('link', { name: 'Ringkasan Node Nutrisi', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(sidebar.getByRole('button', { name: 'Menu Node Nutrisi', exact: true })).toHaveAttribute('aria-expanded', 'true');
 
-    await sidebar.getByRole('button', { name: 'Menu Node 2', exact: true }).click();
-    await sidebar.locator('#node-2-menu').getByRole('link', { name: 'Kelembapan tanah', exact: true }).click();
-    await expect(page).toHaveURL(/\/nodes\/2\?sensor=soil_moisture&hours=24#tren$/);
-    await expect(page.getByRole('heading', { name: 'Monitoring Node 2', exact: true })).toBeVisible();
+    await sidebar.getByRole('button', { name: 'Menu Node Iklim', exact: true }).click();
+    await sidebar.locator('#node-2-menu').getByRole('link', { name: 'Debit air', exact: true }).click();
+    await expect(page).toHaveURL(/\/nodes\/2\?sensor=water_flow&hours=24#tren$/);
+    await expect(page.getByRole('heading', { name: 'Monitoring Node Iklim', exact: true })).toBeVisible();
     await expect(page.locator('[data-node-id]')).toHaveCount(1);
-    await expect(page.locator('[data-node-id="2"] [data-sensor-reading]')).toHaveCount(3);
-    await expect(page.locator('[data-active-sensor]')).toHaveText('Kelembapan tanah · %');
-    await expect(sidebar.locator('#node-2-menu').getByRole('link', { name: 'Kelembapan tanah', exact: true })).toHaveAttribute('aria-current', 'page');
-    await expect(sidebar.getByRole('button', { name: 'Menu Node 2', exact: true })).toHaveAttribute('aria-expanded', 'true');
-    await expect(page.locator('[data-chart]')).toHaveAttribute('aria-label', /Node 2/);
-    await expect(page.locator('[data-chart]')).not.toHaveAttribute('aria-label', /Node 1/);
+    await expect(page.locator('[data-node-id="2"] [data-sensor-reading]')).toHaveCount(4);
+    await expect(page.locator('[data-active-sensor]')).toHaveText('Debit air · L/menit');
+    await expect(sidebar.locator('#node-2-menu').getByRole('link', { name: 'Debit air', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(sidebar.getByRole('button', { name: 'Menu Node Iklim', exact: true })).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('[data-chart]')).toHaveAttribute('aria-label', /Node Iklim/);
+    await expect(page.locator('[data-chart]')).not.toHaveAttribute('aria-label', /Node Nutrisi/);
 });
 
-test('warna Node 2 konsisten pada grafik detail', async ({ page, renderPage }) => {
+test('warna Node Iklim konsisten pada grafik detail', async ({ page, renderPage }) => {
     const html = renderPage('/nodes/2');
-    const sensor = { id: 'temperature', name: 'Suhu udara', unit: '°C', decimals: 1 };
+    const sensor = { id: 'air_temperature', name: 'Suhu udara', unit: '°C', decimals: 1 };
     const data = {
         sensors: [sensor],
-        nodes: [{ id: '2', name: 'Node 2', sensors: [{ ...sensor, readings: [{ recorded_at: '2026-01-01T10:00:00Z', value: 27 }] }] }],
+        nodes: [{ id: '2', name: 'Node Iklim', sensors: [{ ...sensor, readings: [{ recorded_at: '2026-01-01T10:00:00Z', value: 27 }] }] }],
         generatedAt: '2026-01-01T10:00:00Z',
     };
     await page.route('**/nodes/2', (route) => route.fulfill({ contentType: 'text/html', body: withMonitoringData(html, data) }));
     await page.goto('/nodes/2');
     await expect(page.locator('[data-chart-series="2"]')).toHaveClass(/series-node-2/);
-    await expect(page.locator('[data-sensor-id="temperature"] [data-sparkline] polyline')).toHaveClass(/series-node-2/);
+    await expect(page.locator('[data-sensor-id="air_temperature"] [data-sparkline] polyline')).toHaveClass(/series-node-2/);
 });
 
 for (const width of [360, 1440]) {
@@ -90,10 +90,10 @@ for (const width of [360, 1440]) {
                 return route.fulfill({ contentType: 'text/html', body: renderPage(url.pathname + url.search) });
             });
             for (const id of ['1', '2']) {
-                await page.goto(`/nodes/${id}?sensor=soil_moisture`);
-                await expect(page.getByRole('heading', { name: `Monitoring Node ${id}`, exact: true })).toBeVisible();
+                await page.goto(`/nodes/${id}?sensor=${id === '1' ? 'ph' : 'water_flow'}`);
+                await expect(page.getByRole('heading', { name: `Monitoring ${id === '1' ? 'Node Nutrisi' : 'Node Iklim'}`, exact: true })).toBeVisible();
                 await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-                await expect(page.locator('[data-active-sensor]')).toHaveText('Kelembapan tanah · %');
+                await expect(page.locator('[data-active-sensor]')).toHaveText(id === '1' ? 'pH nutrisi · pH' : 'Debit air · L/menit');
                 expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
                 for (const item of await page.locator('.dashboard-header, .node-card, .history-table, .trend-card').all()) {
                     const box = await item.boundingBox();
@@ -106,10 +106,10 @@ for (const width of [360, 1440]) {
                 await page.locator('[data-sidebar-trigger]').click();
                 const sidebar = page.locator('[data-sidebar]');
                 await expect(sidebar).toBeVisible();
-                await expect(sidebar.getByRole('button', { name: 'Menu Node 2', exact: true })).toHaveAttribute('aria-expanded', 'true');
+                await expect(sidebar.getByRole('button', { name: 'Menu Node Iklim', exact: true })).toHaveAttribute('aria-expanded', 'true');
                 await page.screenshot({ path: testInfo.outputPath('drawer.png') });
                 await sidebar.locator('#node-2-menu').getByRole('link', { name: 'Suhu udara', exact: true }).click();
-                await expect(page).toHaveURL(/\/nodes\/2\?sensor=temperature&hours=24#tren$/);
+                await expect(page).toHaveURL(/\/nodes\/2\?sensor=air_temperature&hours=24#tren$/);
                 await expect(sidebar).not.toBeVisible();
                 await expect(page.locator('[data-workspace]')).not.toHaveAttribute('inert');
                 await expect(page.locator('[data-active-sensor]')).toHaveText('Suhu udara · °C');
@@ -124,15 +124,15 @@ test('sidebar memiliki dropdown node yang dapat dibuka dengan keyboard', async (
     await openDashboard(page, dashboardHtml);
     const sidebar = page.locator('[data-sidebar]');
     await expect(sidebar).toBeVisible();
-    const nodeOne = sidebar.getByRole('button', { name: 'Menu Node 1', exact: true });
-    const nodeTwo = sidebar.getByRole('button', { name: 'Menu Node 2', exact: true });
+    const nodeOne = sidebar.getByRole('button', { name: 'Menu Node Nutrisi', exact: true });
+    const nodeTwo = sidebar.getByRole('button', { name: 'Menu Node Iklim', exact: true });
     await expect(nodeOne).toHaveAttribute('aria-expanded', 'false');
     await nodeOne.focus();
     await page.keyboard.press('Enter');
     await expect(nodeOne).toHaveAttribute('aria-expanded', 'true');
     await expect(sidebar.locator('#node-1-menu')).toBeVisible();
-    await expect(sidebar.locator('#node-1-menu').getByRole('link', { name: 'Ringkasan Node 1' })).toHaveAttribute('href', /\/nodes\/1$/);
-    await expect(sidebar.locator('#node-1-menu').getByRole('link', { name: 'Suhu udara', exact: true })).toHaveAttribute('href', /\/nodes\/1\?sensor=temperature&hours=24#tren$/);
+    await expect(sidebar.locator('#node-1-menu').getByRole('link', { name: 'Ringkasan Node Nutrisi' })).toHaveAttribute('href', /\/nodes\/1$/);
+    await expect(sidebar.locator('#node-1-menu').getByRole('link', { name: 'pH nutrisi', exact: true })).toHaveAttribute('href', /\/nodes\/1\?sensor=ph&hours=24#tren$/);
     await nodeTwo.click();
     await expect(nodeTwo).toHaveAttribute('aria-expanded', 'true');
     await expect(nodeOne).toHaveAttribute('aria-expanded', 'false');
